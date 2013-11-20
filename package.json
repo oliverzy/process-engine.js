@@ -1,0 +1,11 @@
+{
+  "name": "process-engine",
+  "version": "0.0.0",
+  "description": "Javascript Process Engine inspired by jBPM",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Oliver Zhou",
+  "license": "BSD-2-Clause"
+}
