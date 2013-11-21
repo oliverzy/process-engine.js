@@ -68,7 +68,7 @@ Node.prototype.complete = function () {
   this.task.outgoingFlows.forEach(function (flow) {
     if (this.task.type == 'decision') {
       // Evaluate condition if it has multiple outgoing flows, and skip execution for false condition
-      if (this.task.outgoingFlows.length > 1 && !flow.condition())
+      if (this.task.outgoingFlows.length > 1 && !flow.condition(this.processInstance.variables))
         return;
     }
 
@@ -97,7 +97,7 @@ function ServiceNode() {
 }
 util.inherits(ServiceNode, Node);
 ServiceNode.prototype.executeInternal = function (complete) {
-  this.task.action(complete);
+  this.task.action(this.processInstance.variables, complete);
 };
 
 function ProcessInstance(def) {
@@ -105,8 +105,10 @@ function ProcessInstance(def) {
   this.def = def;
   // The active node instances (key: task id)
   this.nodePool = {};
+  this.status = ProcessInstance.STATUS.NEW;
 }
 util.inherits(ProcessInstance, EventEmitter);
+ProcessInstance.STATUS = {NEW: 'New', RUNNING: 'Running', WAITING: 'Waiting', COMPLETED: 'Completed', FAILED: 'Failed'};
 ProcessInstance.prototype.createNode = function (task) {
   var node;
   switch (task.type) {
@@ -119,7 +121,12 @@ ProcessInstance.prototype.createNode = function (task) {
   }
   return node;
 };
-ProcessInstance.prototype.start = function () {
+ProcessInstance.prototype.start = function (variables) {
+  this.status = ProcessInstance.STATUS.RUNNING;
+  this.on('end', function () {
+    this.status = ProcessInstance.STATUS.COMPLETED;
+  });
+  this.variables = variables;
   var node = new Node(this.def.tasks[0], this);
   node.execute();
 };

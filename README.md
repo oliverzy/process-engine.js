@@ -1,4 +1,4 @@
-NodeJS process engine inspired by jBPMN
+NodeJS process engine inspired by jBPMN/Activiti/Camunda
 
 Roadmap
 * Human Task Management
