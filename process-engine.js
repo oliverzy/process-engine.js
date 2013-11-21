@@ -1,5 +1,6 @@
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
+var _ = require('lodash');
 
 /**
 Process Definition
@@ -15,6 +16,26 @@ function Decision() {
   this.type = 'decision';
 }
 util.inherits(Decision, Task);
+
+function ProcessBuilder() {
+  this.startTask = function () {
+    return new Task('start-task');
+  };
+  this.endTask = function () {
+    return new Task('end-task');
+  };
+  this.serviceTask = function (action) {
+    var task  = new Task('service-task');
+    task.action = action;
+    return task;
+  };
+  this.decision = function () {
+    return new Decision();
+  };
+  this.humanTask = function () {
+    return new Task('human-task');
+  };
+}
 
 function ProcessDefinition() {
   this.tasks = {};
@@ -100,6 +121,29 @@ ServiceNode.prototype.executeInternal = function (complete) {
   this.task.action(this.processInstance.variables, complete);
 };
 
+function HumanTaskNode() {
+  HumanTaskNode.super_.apply(this, arguments);
+}
+util.inherits(HumanTaskNode, Node);
+HumanTaskNode.prototype.executeInternal = function (complete) {
+  // Put it in the waiting status
+  this.processInstance.status = ProcessInstance.STATUS.WAITING;
+};
+
+function ProcessEngine() {
+  this.nextProcessId = 0;
+  this.processPool = {};
+}
+ProcessEngine.prototype.createProcessInstance = function (def) {
+  var processInstance = new ProcessInstance(def);
+  processInstance.id = this.nextProcessId++;
+  this.processPool[processInstance.id] = processInstance;
+  return processInstance;
+};
+ProcessEngine.prototype.completeTask = function (processId, taskId) {
+  this.processPool[processId].nodePool[taskId].complete();
+};
+
 function ProcessInstance(def) {
   ProcessInstance.super_.apply(this, arguments);
   this.def = def;
@@ -115,11 +159,20 @@ ProcessInstance.prototype.createNode = function (task) {
   case 'service-task':
     node = new ServiceNode(task, this);
     break;
+  case 'human-task':
+    node = new HumanTaskNode(task, this);
+    break;
   default:
     node = new Node(task, this);
     break;
   }
   return node;
+};
+ProcessInstance.prototype.getNode = function (taskName) {
+  for (var key in this.nodePool) {
+    if (this.nodePool[key].task.name === taskName)
+      return this.nodePool[key];
+  }
 };
 ProcessInstance.prototype.start = function (variables) {
   this.status = ProcessInstance.STATUS.RUNNING;
@@ -131,27 +184,11 @@ ProcessInstance.prototype.start = function (variables) {
   node.execute();
 };
 
-function ProcessBuilder() {
-  this.startTask = function () {
-    return new Task('start-task');
-  };
-  this.endTask = function () {
-    return new Task('end-task');
-  };
-  this.serviceTask = function (action) {
-    var task  = new Task('service-task');
-    task.action = action;
-    return task;
-  };
-  this.decision = function () {
-    return new Decision();
-  };
-}
-
 /**
  * CMD Export
  */
 module.exports = {
+  processEngine: new ProcessEngine(),
   ProcessInstance: ProcessInstance,
   ProcessDefinition: ProcessDefinition,
   processBuilder: new ProcessBuilder()

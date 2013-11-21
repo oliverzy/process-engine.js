@@ -1,3 +1,4 @@
+var processEngine = require('./process-engine.js').processEngine;
 var ProcessDefinition = require('./process-engine.js').ProcessDefinition;
 var ProcessInstance = require('./process-engine.js').ProcessInstance;
 var processBuilder = require('./process-engine.js').processBuilder;
@@ -25,8 +26,7 @@ describe('simple process', function() {
 
   var processInstance;
   beforeEach(function() {
-    var processDefinition = createProcessDefinition();
-    processInstance = new ProcessInstance(processDefinition);
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
   });
 
   it('should pass', function(done) {
@@ -84,8 +84,7 @@ describe('simple parallel process', function() {
 
   var processInstance;
   beforeEach(function() {
-    var processDefinition = createProcessDefinition();
-    processInstance = new ProcessInstance(processDefinition);
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
   });
 
   it('should pass', function(done) {
@@ -157,8 +156,7 @@ describe('simple exclusive gateway process', function() {
 
   var processInstance;
   beforeEach(function() {
-    var processDefinition = createProcessDefinition();
-    processInstance = new ProcessInstance(processDefinition);
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
   });
 
   it('should pass', function(done) {
@@ -243,8 +241,7 @@ describe('exclusive gateway + parrallel gateway process', function() {
 
   var processInstance;
   beforeEach(function() {
-    var processDefinition = createProcessDefinition();
-    processInstance = new ProcessInstance(processDefinition);
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
   });
 
   it('should pass', function(done) {
@@ -263,6 +260,54 @@ describe('exclusive gateway + parrallel gateway process', function() {
     });
 
     processInstance.start({score: 50});
+  });
+});
+
+
+/**
+ * start -> human task -> end
+ */
+describe('simple human process', function() {
+  function createProcessDefinition() {
+    var processDefinition = new ProcessDefinition();
+    var startTask = processBuilder.startTask();
+    processDefinition.addTask(startTask);
+    var humanTask = processBuilder.humanTask();
+    humanTask.name = 'humanTask';
+    processDefinition.addTask(humanTask);
+
+    var endTask = processBuilder.endTask();
+    processDefinition.addTask(endTask);
+    processDefinition.addFlow(startTask, humanTask);
+    processDefinition.addFlow(humanTask, endTask);
+
+    return processDefinition;
+  }
+
+  var processInstance;
+  beforeEach(function() {
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+  });
+
+  it('should pass', function(done) {
+    var events = [];
+    processInstance.on('before', function (task) {
+      if (task.type === 'start-task')
+        events.push(task.type);
+      else if (task.type === 'human-task')
+        events.push(task.type);
+    });
+    processInstance.on('end', function () {
+      expect(events[0]).toEqual('start-task');
+      expect(events[1]).toEqual('human-task');
+      done();
+    });
+
+    processInstance.start();
+    // Simulate Human Task Complete
+    setTimeout(function () {
+      processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
+    }, 500);
   });
 });
 
