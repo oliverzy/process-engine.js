@@ -1,7 +1,7 @@
-var processEngine = require('./process-engine.js').processEngine;
-var ProcessDefinition = require('./process-engine.js').ProcessDefinition;
-var ProcessInstance = require('./process-engine.js').ProcessInstance;
-var processBuilder = require('./process-engine.js').processBuilder;
+var processEngine = require('../process-engine.js').processEngine;
+var ProcessDefinition = require('../process-engine.js').ProcessDefinition;
+var ProcessInstance = require('../process-engine.js').ProcessInstance;
+var processBuilder = require('../process-engine.js').processBuilder;
 
 /**
  * start -> service task -> end
