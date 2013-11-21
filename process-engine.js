@@ -2,52 +2,20 @@ var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
 /**
-Built-in Tasks
+Process Definition
 */
-function BaseTask() {
-  BaseTask.super_.apply(this, arguments);
+function Task(type) {
+  this.type = type;
   this.incomingFlows = [];
   this.outgoingFlows = [];
 }
-util.inherits(BaseTask, EventEmitter);
-BaseTask.prototype.execute = function (complete) {
-  complete();
-};
-function StartTask() {
-  StartTask.super_.apply(this, arguments);
-  this.type = "start-task";
-}
-util.inherits(StartTask, BaseTask);
-function EndTask() {
-  EndTask.super_.apply(this, arguments);
-  this.type = "end-task";
-}
-util.inherits(EndTask, BaseTask);
 
-function ServiceTask(action) {
-  ServiceTask.super_.apply(this, arguments);
-  this.type = "service-task";
-  this.action = action;
+function Decision() {
+  Decision.super_.apply(this, arguments);
+  this.type = 'decision';
 }
-util.inherits(ServiceTask, BaseTask);
-ServiceTask.prototype.execute = function (complete) {
-  this.action(complete);
-};
+util.inherits(Decision, Task);
 
-// TODO: Handle Human Task
-function HumanTask() {
-  HumanTask.super_.apply(this, arguments);
-}
-util.inherits(HumanTask, BaseTask);
-HumanTask.prototype.execute = function (complete) {
-};
-
-//TODO: Decision Node | Exclusive Gateway - Must be explicitly modelled as diamond symbol
-//      Fork/Join | Parallel Gateway - Default Behavior
-
-/**
-Process Definition
-*/
 function ProcessDefinition() {
   this.tasks = {};
   this.nextTaskId = 0;
@@ -58,7 +26,6 @@ ProcessDefinition.prototype.addTask = function (task) {
   task.id = id;
   this.tasks[id] = task;
 };
-
 /**
  * create a flow
  * 
@@ -86,30 +53,51 @@ function Node(task, processInstance) {
   this.incomingFlowCompletedNumber = 0;
 }
 util.inherits(Node, EventEmitter);
-
 Node.prototype.execute = function () {
   this.processInstance.emit('before', this.task);
-  this.task.execute(this.complete.bind(this));
+  this.executeInternal(this.complete.bind(this));
+};
+Node.prototype.executeInternal = function (complete) {
+  complete();
 };
 Node.prototype.complete = function () {
   this.processInstance.emit('after', this.task);
   if (this.task.type === 'end-task')
     this.processInstance.emit('end');
+  // Follow outgoing flows
   this.task.outgoingFlows.forEach(function (flow) {
+    if (this.task.type == 'decision') {
+      // Evaluate condition if it has multiple outgoing flows, and skip execution for false condition
+      if (this.task.outgoingFlows.length > 1 && !flow.condition())
+        return;
+    }
+
     var node;
     if (this.processInstance.nodePool[flow.to.id]) {
       node = this.processInstance.nodePool[flow.to.id];
     }
     else {
-      node = new Node(flow.to, this.processInstance);
+      node = this.processInstance.createNode(flow.to);
       this.processInstance.nodePool[flow.to.id] = node;
     }
     node.incomingFlowCompletedNumber++;
-    //console.log('node: ' + node.task + ', incoming: ' + node.incomingFlowCompletedNumber);
-    if (node.incomingFlowCompletedNumber === flow.to.incomingFlows.length) {
+
+    // Need to decide whether to execute next node
+    if (node.task.type == 'decision') { // This means one of condition is satisfied
+      node.execute();
+    }
+    else if (node.incomingFlowCompletedNumber === flow.to.incomingFlows.length) {
       node.execute();
     }
   }.bind(this));
+};
+
+function ServiceNode() {
+  ServiceNode.super_.apply(this, arguments);
+}
+util.inherits(ServiceNode, Node);
+ServiceNode.prototype.executeInternal = function (complete) {
+  this.task.action(complete);
 };
 
 function ProcessInstance(def) {
@@ -119,7 +107,18 @@ function ProcessInstance(def) {
   this.nodePool = {};
 }
 util.inherits(ProcessInstance, EventEmitter);
-
+ProcessInstance.prototype.createNode = function (task) {
+  var node;
+  switch (task.type) {
+  case 'service-task':
+    node = new ServiceNode(task, this);
+    break;
+  default:
+    node = new Node(task, this);
+    break;
+  }
+  return node;
+};
 ProcessInstance.prototype.start = function () {
   var node = new Node(this.def.tasks[0], this);
   node.execute();
@@ -127,68 +126,27 @@ ProcessInstance.prototype.start = function () {
 
 function ProcessBuilder() {
   this.startTask = function () {
-    return new StartTask();
+    return new Task('start-task');
   };
   this.endTask = function () {
-    return new EndTask();
+    return new Task('end-task');
   };
   this.serviceTask = function (action) {
-    return new ServiceTask(action);
+    var task  = new Task('service-task');
+    task.action = action;
+    return task;
+  };
+  this.decision = function () {
+    return new Decision();
   };
 }
 
 /**
  * CMD Export
  */
-processBuilder = new ProcessBuilder();
 module.exports = {
   ProcessInstance: ProcessInstance,
   ProcessDefinition: ProcessDefinition,
-  processBuilder: processBuilder
+  processBuilder: new ProcessBuilder()
 };
-
-/**
-* Main Function
-*/
-function createProcessDefinition() {
-  var processDefinition = new ProcessDefinition();
-  var startTask = processBuilder.startTask();
-  processDefinition.addTask(startTask);
-
-  var serviceTask1 = processBuilder.serviceTask(function (complete) {
-    console.log('Oh, service task1');
-    complete();
-  });
-  processDefinition.addTask(serviceTask1);
-
-  var serviceTask2 = processBuilder.serviceTask(function (complete) {
-    console.log('Oh, service task2');
-    complete();
-  });
-  processDefinition.addTask(serviceTask2);
-
-  var endTask = processBuilder.endTask();
-  processDefinition.addTask(endTask);
-  processDefinition.addFlow(startTask, serviceTask1);
-  processDefinition.addFlow(startTask, serviceTask2);
-  processDefinition.addFlow(serviceTask1, endTask);
-  processDefinition.addFlow(serviceTask2, endTask);
-
-  return processDefinition;
-}
-
-var processInstance = new ProcessInstance(createProcessDefinition());
-processInstance.on('before', function (task) {
-  if (task.type === 'start-task')
-    console.log("Well, start event is emitted!");
-  else if (task instanceof ServiceTask)
-    console.log("Service Task: " + task.id);
-  else if (task.type === 'end-task')
-    console.log("Goodbye, end event is emitted!");
-});
-processInstance.on('end', function () {
-  console.log("Process is ended!");
-});
-processInstance.start();
-
 
