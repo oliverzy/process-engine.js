@@ -4,6 +4,8 @@ var _ = require('lodash');
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
+var Q = require('q');
+var funcster = require('funcster');
 
 /**
 Process Definition
@@ -13,6 +15,25 @@ function Task(type) {
   this.incomingFlows = [];
   this.outgoingFlows = [];
 }
+Task.prototype.serialize = function () {
+  function handleFlow(flow) {
+    return {
+        from: flow.from.id,
+        to: flow.to.id,
+        condition: this.condition ? funcster.serialize(this.condition) : null
+      };
+  }
+  var entity = {
+    type: this.type,
+    incomingFlows: this.incomingFlows.map(function (flow) {
+      return handleFlow(flow);
+    }),
+    outgoingFlows: this.outgoingFlows.map(function (flow) {
+      return handleFlow(flow);
+    })
+  };
+  return entity;
+};
 
 function Decision() {
   Decision.super_.apply(this, arguments);
@@ -70,6 +91,13 @@ ProcessDefinition.prototype.addFlow = function (taskFrom, taskTo, condition) {
   taskTo.incomingFlows.push(flow);
   taskFrom.outgoingFlows.push(flow);
 };
+ProcessDefinition.prototype.serialize = function () {
+  var entities = [];
+  _.forOwn(this.tasks, function (task) {
+    entities.push(task.serialize());
+  }, this);
+  return entities;
+};
 
 /**
 Runtime Graph Structure
@@ -122,6 +150,17 @@ Node.prototype.complete = function () {
   if (this.task.type === 'end-task')
     this.processInstance.emit('end');
 };
+Node.prototype.serialize = function () {
+  var entity = {
+    processInstance: this.processInstance.id,
+    incomingFlowCompletedNumber: this.incomingFlowCompletedNumber,
+    task: this.task.id
+  };
+  return entity;
+};
+Node.prototype.deserialize = function (entity) {
+
+};
 
 function ServiceNode() {
   ServiceNode.super_.apply(this, arguments);
@@ -133,6 +172,7 @@ ServiceNode.prototype.executeInternal = function (complete) {
 
 
 function ProcessEngine() {
+  // TODO: this one should be fetched from database
   this.nextProcessId = 0;
   this.taskTypes = {
     'service-task': [Task, ServiceNode]
@@ -153,7 +193,25 @@ ProcessEngine.prototype.createProcessInstance = function (def) {
 ProcessEngine.prototype.completeTask = function (processId, taskId) {
   this.processPool[processId].nodePool[taskId].complete();
 };
+ProcessEngine.prototype.saveProcessInstance = function (entity) {
+  if (entity._id)
+    return Q.ninvoke(this.instanceCollection, 'update', {'_id': entity._id}, entity, {}).then(function () {
+      return entity;
+    });
+  else
+    return Q.ninvoke(this.instanceCollection, 'insert', entity);
+};
+ProcessEngine.prototype.loadProcessInstance = function (id) {
+  return Q.ninvoke(this.instanceCollection, 'find', {id: id}).then(function (entities) {
+    if (entities.length === 0) return;
+    var instance = new ProcessInstance();
+    instance.deserialize();
+    this.processPool[instance.id] = instance;
+    return instance;
+  });
+};
 var processEngine = new ProcessEngine();
+
 
 
 function ProcessInstance(def) {
@@ -187,6 +245,51 @@ ProcessInstance.prototype.start = function (variables) {
   this.variables = variables;
   var node = new Node(this.def.tasks[0], this);
   node.execute();
+};
+ProcessInstance.prototype.changeStatus = function (status) {
+  this.status = status;
+  if (status === ProcessInstance.STATUS.WAITING)
+    this.savePoint();
+};
+ProcessInstance.prototype.savePoint = function () {
+  var entity = this.serialize();
+  processEngine.saveProcessInstance(entity).then(function (entity) {
+    console.log(util.inspect(entity, {depth: 5, colors: false}));
+    return entity;
+  });
+};
+ProcessInstance.prototype.serialize = function () {
+  var serializeNodePool = function() {
+    var serializedNodes = [];
+    _.forOwn(this.nodePool, function (node) {
+      serializedNodes.push(node.serialize());
+    }, this);
+    return serializedNodes;
+  }.bind(this);
+
+  var entity = {
+    id: this.id,
+    def: this.def.serialize(),
+    status: this.status,
+    nodePool: serializeNodePool(),
+    variables: this.variables
+  };
+  return entity;
+};
+ProcessInstance.prototype.deserialize = function (entity) {
+  this.id = entity.id;
+  this.status = entity.status;
+  this.variables = entity.variables;
+  this.nodePool = entity.nodePool.map(function (entity) {
+    var node = new Node();
+    node.deserialize();
+    return node;
+  }.bind(this));
+
+  // Fix reference
+  _.forOwn(this.nodePool, function (node) {
+
+  }, this);
 };
 
 

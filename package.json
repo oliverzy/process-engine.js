@@ -11,6 +11,8 @@
   "dependencies": {
     "lodash": "~2.3.0",
     "nedb": "~0.8.12",
-    "underscore-string": "~2.3.3"
+    "underscore-string": "~2.3.3",
+    "q": "~0.9.7",
+    "funcster": "0.0.3"
   }
 }

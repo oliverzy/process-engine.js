@@ -24,7 +24,7 @@ function HumanTaskNode() {
 util.inherits(HumanTaskNode, Node);
 HumanTaskNode.prototype.executeInternal = function (complete) {
   // Put it in the waiting status
-  this.processInstance.status = ProcessInstance.STATUS.WAITING;
+  this.processInstance.changeStatus(ProcessInstance.STATUS.WAITING);
 };
 
 function HumanTaskService() {
