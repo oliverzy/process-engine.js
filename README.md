@@ -1,8 +1,7 @@
-NodeJS process engine inspired by jBPMN/Activiti/Camunda
+NodeJS process engine inspired by jBPMN5/Activiti
 
 Roadmap
 * Human Task Management
-* Exclusive/Parallel Gateway with/without circle
+* Exclusive/Parallel Gateway with circle
 * Persistence
-* Domain Specific Tasks(?)
 * Sub Process

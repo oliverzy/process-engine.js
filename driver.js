@@ -33,7 +33,7 @@ processInstance.on('before', function (task) {
     console.log("Goodbye, end event is emitted!");
 });
 processInstance.on('end', function () {
-  console.log("Process is ended!");
+  console.log("Process is ended!", processInstance.nodePool);
 });
 processInstance.start({
   score: 50

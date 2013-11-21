@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
+var Datastore = require('nedb');
 
 /**
 Process Definition
@@ -89,8 +90,8 @@ Node.prototype.executeInternal = function (complete) {
 };
 Node.prototype.complete = function () {
   this.processInstance.emit('after', this.task);
-  if (this.task.type === 'end-task')
-    this.processInstance.emit('end');
+  delete this.processInstance.nodePool[this.task.id];
+
   // Follow outgoing flows
   this.task.outgoingFlows.forEach(function (flow) {
     if (this.task.type == 'decision') {
@@ -117,6 +118,9 @@ Node.prototype.complete = function () {
       node.execute();
     }
   }.bind(this));
+
+  if (this.task.type === 'end-task')
+    this.processInstance.emit('end');
 };
 
 function ServiceNode() {
@@ -134,6 +138,7 @@ function ProcessEngine() {
     'service-task': [Task, ServiceNode]
   };
   this.processPool = {};
+  this.instanceCollection = new Datastore();
 }
 ProcessEngine.prototype.registerTaskType = function (type, Task, Node) {
   this.taskTypes[type] = [Task, Node];
