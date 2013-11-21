@@ -1,6 +1,8 @@
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
+_.str = require('underscore.string');
+_.mixin(_.str.exports());
 
 /**
 Process Definition
@@ -32,10 +34,14 @@ function ProcessBuilder() {
   this.decision = function () {
     return new Decision();
   };
-  this.humanTask = function () {
-    return new Task('human-task');
-  };
 }
+ProcessBuilder.prototype.registerTask = function (type, Task) {
+  this[_.camelize(type)] = function () {
+    return new Task();
+  };
+};
+var processBuilder = new ProcessBuilder();
+
 
 function ProcessDefinition() {
   this.tasks = {};
@@ -121,19 +127,18 @@ ServiceNode.prototype.executeInternal = function (complete) {
   this.task.action(this.processInstance.variables, complete);
 };
 
-function HumanTaskNode() {
-  HumanTaskNode.super_.apply(this, arguments);
-}
-util.inherits(HumanTaskNode, Node);
-HumanTaskNode.prototype.executeInternal = function (complete) {
-  // Put it in the waiting status
-  this.processInstance.status = ProcessInstance.STATUS.WAITING;
-};
 
 function ProcessEngine() {
   this.nextProcessId = 0;
+  this.taskTypes = {
+    'service-task': [Task, ServiceNode]
+  };
   this.processPool = {};
 }
+ProcessEngine.prototype.registerTaskType = function (type, Task, Node) {
+  this.taskTypes[type] = [Task, Node];
+  processBuilder.registerTask(type, Task);
+};
 ProcessEngine.prototype.createProcessInstance = function (def) {
   var processInstance = new ProcessInstance(def);
   processInstance.id = this.nextProcessId++;
@@ -143,6 +148,8 @@ ProcessEngine.prototype.createProcessInstance = function (def) {
 ProcessEngine.prototype.completeTask = function (processId, taskId) {
   this.processPool[processId].nodePool[taskId].complete();
 };
+var processEngine = new ProcessEngine();
+
 
 function ProcessInstance(def) {
   ProcessInstance.super_.apply(this, arguments);
@@ -154,18 +161,11 @@ function ProcessInstance(def) {
 util.inherits(ProcessInstance, EventEmitter);
 ProcessInstance.STATUS = {NEW: 'New', RUNNING: 'Running', WAITING: 'Waiting', COMPLETED: 'Completed', FAILED: 'Failed'};
 ProcessInstance.prototype.createNode = function (task) {
-  var node;
-  switch (task.type) {
-  case 'service-task':
-    node = new ServiceNode(task, this);
-    break;
-  case 'human-task':
-    node = new HumanTaskNode(task, this);
-    break;
-  default:
+  var taskType = processEngine.taskTypes[task.type];
+  if (!taskType)
     node = new Node(task, this);
-    break;
-  }
+  else
+    node = new taskType[1](task, this);
   return node;
 };
 ProcessInstance.prototype.getNode = function (taskName) {
@@ -184,13 +184,16 @@ ProcessInstance.prototype.start = function (variables) {
   node.execute();
 };
 
+
 /**
  * CMD Export
  */
 module.exports = {
-  processEngine: new ProcessEngine(),
+  processEngine: processEngine,
   ProcessInstance: ProcessInstance,
   ProcessDefinition: ProcessDefinition,
-  processBuilder: new ProcessBuilder()
+  processBuilder: processBuilder,
+  Task: Task,
+  Node: Node
 };
 

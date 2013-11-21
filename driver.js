@@ -2,10 +2,10 @@
 * This file is used to test the lastest development feature
 * For unit test, go for jasimine-node
 */
-var processEngine = require('./process-engine.js').processEngine;
-var ProcessDefinition = require('./process-engine.js').ProcessDefinition;
-var ProcessInstance = require('./process-engine.js').ProcessInstance;
-var processBuilder = require('./process-engine.js').processBuilder;
+var processEngine = require('./').processEngine;
+var ProcessDefinition = require('./').ProcessDefinition;
+var ProcessInstance = require('./').ProcessInstance;
+var processBuilder = require('./').processBuilder;
 
 function createProcessDefinition() {
   var processDefinition = new ProcessDefinition();

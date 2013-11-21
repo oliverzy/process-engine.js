@@ -10,6 +10,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "lodash": "~2.3.0",
-    "nedb": "~0.8.12"
+    "nedb": "~0.8.12",
+    "underscore-string": "~2.3.3"
   }
 }
