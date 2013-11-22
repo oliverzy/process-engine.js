@@ -38,9 +38,12 @@ Task.prototype.serialize = function () {
 };
 Task.deserialize = function (entity) {
   var task = processBuilder.createTask(entity.type);
-  task.id = entity.id;
-  task.type = entity.type;
+  task.deserialize(entity);
   return task;
+};
+Task.prototype.deserialize = function (entity) {
+  this.id = entity.id;
+  this.type = entity.type;
 };
 
 function Decision() {

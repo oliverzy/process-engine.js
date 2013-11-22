@@ -17,6 +17,19 @@ function HumanTask() {
   this.candidateGroups = [];
 }
 util.inherits(HumanTask, Task);
+HumanTask.prototype.serialize = function () {
+  var entity = HumanTask.super_.prototype.serialize.call(this);
+  entity.assignee = this.assignee;
+  entity.candidateUsers = this.candidateUsers;
+  entity.candidateGroups = this.candidateGroups;
+  return entity;
+};
+HumanTask.prototype.deserialize = function (entity) {
+  HumanTask.super_.prototype.deserialize.call(this, entity);
+  this.assignee = entity.assignee;
+  this.candidateUsers = entity.candidateUsers;
+  this.candidateGroups = entity.candidateGroups;
+};
 
 function HumanTaskNode() {
   HumanTaskNode.super_.apply(this, arguments);

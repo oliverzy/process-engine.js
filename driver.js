@@ -14,6 +14,7 @@ function createProcessDefinition() {
   processDefinition.addTask(startTask);
   var humanTask = processBuilder.humanTask();
   humanTask.name = 'humanTask';
+  humanTask.assignee = 'Oliver Zhou';
   processDefinition.addTask(humanTask);
   var serviceTask = processBuilder.serviceTask(function (variables, complete) {
     console.log('Oh, service task');
