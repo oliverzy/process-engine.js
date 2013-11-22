@@ -11,6 +11,7 @@ var funcster = require('funcster');
 Process Definition
 */
 function Task(type) {
+  this.id = null;
   this.type = type;
   this.incomingFlows = [];
   this.outgoingFlows = [];
@@ -24,6 +25,7 @@ Task.prototype.serialize = function () {
       };
   }
   var entity = {
+    id: this.id,
     type: this.type,
     incomingFlows: this.incomingFlows.map(function (flow) {
       return handleFlow(flow);
@@ -33,6 +35,12 @@ Task.prototype.serialize = function () {
     })
   };
   return entity;
+};
+Task.deserialize = function (entity) {
+  var task = processBuilder.createTask(entity.type);
+  task.id = entity.id;
+  task.type = entity.type;
+  return task;
 };
 
 function Decision() {
@@ -61,6 +69,9 @@ ProcessBuilder.prototype.registerTask = function (type, Task) {
   this[_.camelize(type)] = function () {
     return new Task();
   };
+};
+ProcessBuilder.prototype.createTask = function (type) {
+  return this[_.camelize(type)]();
 };
 var processBuilder = new ProcessBuilder();
 
@@ -97,6 +108,31 @@ ProcessDefinition.prototype.serialize = function () {
     entities.push(task.serialize());
   }, this);
   return entities;
+};
+ProcessDefinition.deserialize = function (entity) {
+  var def = new ProcessDefinition();
+  entity.forEach(function (taskEntity) {
+    def.addTask(Task.deserialize(taskEntity));
+  });
+
+  entity.forEach(function (taskEntity) {
+    def.tasks[taskEntity.id].incomingFlows = taskEntity.incomingFlows.map(function (flow) {
+      return {
+        from: def.tasks[flow.from],
+        to: def.tasks[flow.to],
+        condition: flow.condition
+      };
+    });
+    def.tasks[taskEntity.id].outgoingFlows = taskEntity.outgoingFlows.map(function (flow) {
+      return {
+        from: def.tasks[flow.from],
+        to: def.tasks[flow.to],
+        condition: flow.condition
+      };
+    });
+  });
+
+  return def;
 };
 
 /**
@@ -158,8 +194,12 @@ Node.prototype.serialize = function () {
   };
   return entity;
 };
-Node.prototype.deserialize = function (entity) {
-
+Node.deserialize = function (entity, instance) {
+  var task = instance.def.tasks[entity.task];
+  var node = instance.createNode(task);
+  node.processInstance = instance;
+  node.task = task;
+  return node;
 };
 
 function ServiceNode() {
@@ -203,12 +243,12 @@ ProcessEngine.prototype.saveProcessInstance = function (entity) {
 };
 ProcessEngine.prototype.loadProcessInstance = function (id) {
   return Q.ninvoke(this.instanceCollection, 'find', {id: id}).then(function (entities) {
+    //console.log(entities);
     if (entities.length === 0) return;
-    var instance = new ProcessInstance();
-    instance.deserialize();
+    var instance = ProcessInstance.deserialize(entities[0]);
     this.processPool[instance.id] = instance;
     return instance;
-  });
+  }.bind(this));
 };
 var processEngine = new ProcessEngine();
 
@@ -216,10 +256,12 @@ var processEngine = new ProcessEngine();
 
 function ProcessInstance(def) {
   ProcessInstance.super_.apply(this, arguments);
+  this.id = null;
   this.def = def;
   // The active node instances (key: task id)
   this.nodePool = {};
   this.status = ProcessInstance.STATUS.NEW;
+  this.variables = {};
 }
 util.inherits(ProcessInstance, EventEmitter);
 ProcessInstance.STATUS = {NEW: 'New', RUNNING: 'Running', WAITING: 'Waiting', COMPLETED: 'Completed', FAILED: 'Failed'};
@@ -249,11 +291,11 @@ ProcessInstance.prototype.start = function (variables) {
 ProcessInstance.prototype.changeStatus = function (status) {
   this.status = status;
   if (status === ProcessInstance.STATUS.WAITING)
-    this.savePoint();
+    this.savePoint().done();
 };
 ProcessInstance.prototype.savePoint = function () {
   var entity = this.serialize();
-  processEngine.saveProcessInstance(entity).then(function (entity) {
+  return processEngine.saveProcessInstance(entity).then(function (entity) {
     console.log(util.inspect(entity, {depth: 5, colors: false}));
     return entity;
   });
@@ -276,20 +318,17 @@ ProcessInstance.prototype.serialize = function () {
   };
   return entity;
 };
-ProcessInstance.prototype.deserialize = function (entity) {
-  this.id = entity.id;
-  this.status = entity.status;
-  this.variables = entity.variables;
-  this.nodePool = entity.nodePool.map(function (entity) {
-    var node = new Node();
-    node.deserialize();
+ProcessInstance.deserialize = function (entity) {
+  var instance = new ProcessInstance();
+  instance.id = entity.id;
+  instance.def = ProcessDefinition.deserialize(entity.def);
+  instance.status = entity.status;
+  instance.variables = entity.variables;
+  instance.nodePool = entity.nodePool.map(function (entity) {
+    var node = Node.deserialize(entity, instance);
     return node;
-  }.bind(this));
-
-  // Fix reference
-  _.forOwn(this.nodePool, function (node) {
-
-  }, this);
+  });
+  return instance;
 };
 
 
