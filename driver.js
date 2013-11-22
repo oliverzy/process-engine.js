@@ -39,7 +39,7 @@ processInstance.start({score: 50});
 
 // Simulate Human Task Complete
 setTimeout(function () {
-  processEngine.clearCache();
+  processEngine.clearPool();
   processEngine.loadProcessInstance(processInstanceId).done(function (instance) {
     //console.log(util.inspect(instance, {depth: 5}));
     instance.on('end', function () {

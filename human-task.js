@@ -3,7 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
 var processEngine = require('./process-engine.js').processEngine;
 var ProcessInstance = require('./process-engine.js').ProcessInstance;
-var Task = require('./process-engine.js').Task;
+var Task = require('./process-definition.js').Task;
 var Node = require('./process-engine.js').Node;
 var Datastore = require('nedb');
 
