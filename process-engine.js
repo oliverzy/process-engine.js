@@ -7,7 +7,7 @@ var Datastore = require('nedb');
 var Q = require('q');
 
 /**
-Process Definition
+* [CORE] Task Definition: Represent a abstract task in the process definition
 */
 function Task(type) {
   this.id = null;
@@ -15,6 +15,7 @@ function Task(type) {
   this.incomingFlows = [];
   this.outgoingFlows = [];
 }
+
 Task.prototype.serialize = function () {
   function handleFlow(flow) {
     return {
@@ -35,22 +36,37 @@ Task.prototype.serialize = function () {
   };
   return entity;
 };
-Task.deserialize = function (entity) {
-  var task = processBuilder.createTask(entity.type);
-  task.deserialize(entity);
-  return task;
-};
+
 Task.prototype.deserialize = function (entity) {
   this.id = entity.id;
   this.type = entity.type;
 };
 
+/**
+ * A factory method for deserialize the all kinds of Task
+ * The subclass must provide a deserialize method in its prototype for extension
+ * @param  {[TaskEntity]} entity
+ * @return {[Task]}
+ */
+Task.deserialize = function (entity) {
+  var task = processBuilder.createTask(entity.type);
+  task.deserialize(entity);
+  return task;
+};
+
+/**
+ * Exclusive Gateway
+ */
 function Decision() {
   Decision.super_.apply(this, arguments);
   this.type = 'decision';
 }
 util.inherits(Decision, Task);
 
+
+/**
+ * The factory class to create different kinds of tasks for the client
+ */
 function ProcessBuilder() {
   this.startTask = function () {
     return new Task('start-task');
@@ -78,6 +94,9 @@ ProcessBuilder.prototype.createTask = function (type) {
 var processBuilder = new ProcessBuilder();
 
 
+/**
+ * [CORE] The definiton of the process which can be executed by process engine
+ */
 function ProcessDefinition() {
   this.tasks = {};
   this.nextTaskId = 0;
@@ -104,6 +123,7 @@ ProcessDefinition.prototype.addFlow = function (taskFrom, taskTo, condition) {
   taskTo.incomingFlows.push(flow);
   taskFrom.outgoingFlows.push(flow);
 };
+
 ProcessDefinition.prototype.serialize = function () {
   var entities = [];
   _.forOwn(this.tasks, function (task) {
@@ -111,6 +131,7 @@ ProcessDefinition.prototype.serialize = function () {
   }, this);
   return entities;
 };
+
 ProcessDefinition.deserialize = function (entity) {
   var def = new ProcessDefinition();
   entity.forEach(function (taskEntity) {
@@ -139,8 +160,10 @@ ProcessDefinition.deserialize = function (entity) {
 };
 
 /**
-Runtime Graph Structure
-*/
+ * [CORE] The graph structure to hold the runtime process execution state
+ * @param {[Task]} task
+ * @param {[ProcessInstance]} processInstance
+ */
 function Node(task, processInstance) {
   Node.super_.apply(this, arguments);
   this.task = task;
@@ -148,13 +171,26 @@ function Node(task, processInstance) {
   this.incomingFlowCompletedNumber = 0;
 }
 util.inherits(Node, EventEmitter);
+
+/**
+ * The method is called when this node is ready to execute
+ */
 Node.prototype.execute = function () {
   this.processInstance.emit('before', this.task);
   this.executeInternal(this.complete.bind(this));
 };
+
+/**
+ * The subclass needs to override this method
+ * @param  {[function]} complete
+ */
 Node.prototype.executeInternal = function (complete) {
   complete();
 };
+
+/**
+ * The method is called when the node execution is done
+ */
 Node.prototype.complete = function () {
   this.processInstance.emit('after', this.task);
   delete this.processInstance.nodePool[this.task.id];
@@ -189,6 +225,7 @@ Node.prototype.complete = function () {
   if (this.task.type === 'end-task')
     this.processInstance.emit('end');
 };
+
 Node.prototype.serialize = function () {
   var entity = {
     processInstance: this.processInstance.id,
@@ -197,6 +234,13 @@ Node.prototype.serialize = function () {
   };
   return entity;
 };
+
+/**
+ * The factory method to deserialize node
+ * @param  {[Entity]} entity
+ * @param  {[ProcessInstance]} instance
+ * @return {[Node]}
+ */
 Node.deserialize = function (entity, instance) {
   var task = instance.def.tasks[entity.task];
   var node = instance.createNode(task);
@@ -209,11 +253,14 @@ function ServiceNode() {
   ServiceNode.super_.apply(this, arguments);
 }
 util.inherits(ServiceNode, Node);
+
 ServiceNode.prototype.executeInternal = function (complete) {
   this.task.action(this.processInstance.variables, complete);
 };
 
-
+/**
+ * [CORE] The entry point to access this library core features
+ */
 function ProcessEngine() {
   // TODO: this one should be fetched from database
   this.nextProcessId = 0;
@@ -223,19 +270,23 @@ function ProcessEngine() {
   this.processPool = {};
   this.instanceCollection = new Datastore();
 }
+
 ProcessEngine.prototype.registerTaskType = function (type, Task, Node) {
   this.taskTypes[type] = [Task, Node];
   processBuilder.registerTask(type, Task);
 };
+
 ProcessEngine.prototype.createProcessInstance = function (def) {
   var processInstance = new ProcessInstance(def);
   processInstance.id = this.nextProcessId++;
   this.processPool[processInstance.id] = processInstance;
   return processInstance;
 };
+
 ProcessEngine.prototype.completeTask = function (processId, taskId) {
   this.processPool[processId].nodePool[taskId].complete();
 };
+
 ProcessEngine.prototype.saveProcessInstance = function (entity) {
   if (entity._id)
     return Q.ninvoke(this.instanceCollection, 'update', {'_id': entity._id}, entity, {}).then(function () {
@@ -244,6 +295,7 @@ ProcessEngine.prototype.saveProcessInstance = function (entity) {
   else
     return Q.ninvoke(this.instanceCollection, 'insert', entity);
 };
+
 ProcessEngine.prototype.loadProcessInstance = function (id) {
   return Q.ninvoke(this.instanceCollection, 'find', {id: id}).then(function (entities) {
     //console.log(entities);
@@ -256,7 +308,9 @@ ProcessEngine.prototype.loadProcessInstance = function (id) {
 var processEngine = new ProcessEngine();
 
 
-
+/**
+ * [CORE] A execution of a particular process definition
+ */
 function ProcessInstance(def) {
   ProcessInstance.super_.apply(this, arguments);
   this.id = null;
@@ -267,7 +321,9 @@ function ProcessInstance(def) {
   this.variables = {};
 }
 util.inherits(ProcessInstance, EventEmitter);
+
 ProcessInstance.STATUS = {NEW: 'New', RUNNING: 'Running', WAITING: 'Waiting', COMPLETED: 'Completed', FAILED: 'Failed'};
+
 ProcessInstance.prototype.createNode = function (task) {
   var taskType = processEngine.taskTypes[task.type];
   if (!taskType)
@@ -276,12 +332,14 @@ ProcessInstance.prototype.createNode = function (task) {
     node = new taskType[1](task, this);
   return node;
 };
+
 ProcessInstance.prototype.getNode = function (taskName) {
   for (var key in this.nodePool) {
     if (this.nodePool[key].task.name === taskName)
       return this.nodePool[key];
   }
 };
+
 ProcessInstance.prototype.start = function (variables) {
   this.status = ProcessInstance.STATUS.RUNNING;
   this.on('end', function () {
@@ -291,11 +349,13 @@ ProcessInstance.prototype.start = function (variables) {
   var node = new Node(this.def.tasks[0], this);
   node.execute();
 };
+
 ProcessInstance.prototype.changeStatus = function (status) {
   this.status = status;
   if (status === ProcessInstance.STATUS.WAITING)
     this.savePoint().done();
 };
+
 ProcessInstance.prototype.savePoint = function () {
   var entity = this.serialize();
   return processEngine.saveProcessInstance(entity).then(function (entity) {
@@ -303,6 +363,7 @@ ProcessInstance.prototype.savePoint = function () {
     return entity;
   });
 };
+
 ProcessInstance.prototype.serialize = function () {
   var serializeNodePool = function() {
     var serializedNodes = [];
@@ -321,6 +382,7 @@ ProcessInstance.prototype.serialize = function () {
   };
   return entity;
 };
+
 ProcessInstance.deserialize = function (entity) {
   var instance = new ProcessInstance();
   instance.id = entity.id;
