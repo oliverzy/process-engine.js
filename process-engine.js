@@ -5,7 +5,6 @@ _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
 var Q = require('q');
-var funcster = require('funcster');
 
 /**
 Process Definition
@@ -21,7 +20,7 @@ Task.prototype.serialize = function () {
     return {
         from: flow.from.id,
         to: flow.to.id,
-        condition: this.condition ? funcster.serialize(this.condition) : null
+        condition: this.condition ? this.condition.toString() : null
       };
   }
   var entity = {
@@ -119,19 +118,20 @@ ProcessDefinition.deserialize = function (entity) {
   });
 
   entity.forEach(function (taskEntity) {
-    def.tasks[taskEntity.id].incomingFlows = taskEntity.incomingFlows.map(function (flow) {
-      return {
+    function deserializeFlow(flow) {
+      var deserializedFlow = {
         from: def.tasks[flow.from],
-        to: def.tasks[flow.to],
-        condition: flow.condition
+        to: def.tasks[flow.to]
       };
+      eval('deserializedFlow.condition = ' + flow.condition);
+      return deserializedFlow;
+    }
+
+    def.tasks[taskEntity.id].incomingFlows = taskEntity.incomingFlows.map(function (flow) {
+      return deserializeFlow(flow);
     });
     def.tasks[taskEntity.id].outgoingFlows = taskEntity.outgoingFlows.map(function (flow) {
-      return {
-        from: def.tasks[flow.from],
-        to: def.tasks[flow.to],
-        condition: flow.condition
-      };
+      return deserializeFlow(flow);
     });
   });
 
