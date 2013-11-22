@@ -8,6 +8,7 @@ var ProcessDefinition = require('./').ProcessDefinition;
 var ProcessInstance = require('./').ProcessInstance;
 var processBuilder = require('./').processBuilder;
 
+var humanTaskId;
 function createProcessDefinition() {
   var processDefinition = new ProcessDefinition();
   var startTask = processBuilder.startTask();
@@ -16,6 +17,7 @@ function createProcessDefinition() {
   humanTask.name = 'humanTask';
   humanTask.assignee = 'Oliver Zhou';
   processDefinition.addTask(humanTask);
+  humanTaskId = humanTask.id;
   var serviceTask = processBuilder.serviceTask(function (variables, complete) {
     console.log('Oh, service task');
     complete();
@@ -32,26 +34,17 @@ function createProcessDefinition() {
 }
 
 var processInstance = processEngine.createProcessInstance(createProcessDefinition());
-processInstance.on('before', function (task) {
-  if (task.type === 'start-task')
-    console.log("Well, start event is emitted!");
-  else if (task.type === 'human-task')
-    console.log("Human Task: " + task.id);
-  else if (task.type === 'end-task')
-    console.log("Goodbye, end event is emitted!");
-});
-processInstance.on('end', function () {
-  console.log("Process is ended!", processInstance.nodePool);
-  processEngine.loadProcessInstance(processInstance.id).done(function (instance) {
-    console.log(util.inspect(instance, {depth: 5}));
-  });
-});
-processInstance.start({
-  score: 50
-});
+var processInstanceId = processInstance.id;
+processInstance.start({score: 50});
 
 // Simulate Human Task Complete
 setTimeout(function () {
-  processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
+  processEngine.clearCache();
+  processEngine.loadProcessInstance(processInstanceId).done(function (instance) {
+    //console.log(util.inspect(instance, {depth: 5}));
+    instance.on('end', function () {
+      console.log('Loaded process instance is ended!');
+    });
+    processEngine.completeTask(processInstanceId, humanTaskId);
+  });
 }, 500);
-

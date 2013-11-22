@@ -1,7 +1,7 @@
 {
   "name": "process-engine",
   "version": "0.0.0",
-  "description": "Javascript Process Engine inspired by jBPM",
+  "description": "Javascript Process Engine inspired by jBPM5/Activiti",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,5 +13,8 @@
     "nedb": "~0.8.12",
     "underscore-string": "~2.3.3",
     "q": "~0.9.7"
+  },
+  "devDependencies": {
+    "chai": "~1.8.1"
   }
 }

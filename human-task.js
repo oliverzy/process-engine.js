@@ -17,6 +17,7 @@ function HumanTask() {
   this.candidateGroups = [];
 }
 util.inherits(HumanTask, Task);
+
 HumanTask.prototype.serialize = function () {
   var entity = HumanTask.super_.prototype.serialize.call(this);
   entity.assignee = this.assignee;
@@ -24,6 +25,7 @@ HumanTask.prototype.serialize = function () {
   entity.candidateGroups = this.candidateGroups;
   return entity;
 };
+
 HumanTask.prototype.deserialize = function (entity) {
   HumanTask.super_.prototype.deserialize.call(this, entity);
   this.assignee = entity.assignee;
@@ -35,6 +37,7 @@ function HumanTaskNode() {
   HumanTaskNode.super_.apply(this, arguments);
 }
 util.inherits(HumanTaskNode, Node);
+
 HumanTaskNode.prototype.executeInternal = function (complete) {
   // Put it in the waiting status
   this.processInstance.changeStatus(ProcessInstance.STATUS.WAITING);
@@ -46,14 +49,19 @@ function HumanTaskService() {
 HumanTaskService.prototype.complete = function (processId, taskId) {
   processEngine.completeTask(processId, taskId);
 };
+
 HumanTaskService.prototype.newTask = function () {
 };
+
 HumanTaskService.prototype.saveTask = function () {
 };
+
 HumanTaskService.prototype.claim = function () {
 };
+
 HumanTaskService.prototype.setAssignee = function (assignee) {
 };
+
 HumanTaskService.prototype.query = function (conditions) {
 };
 

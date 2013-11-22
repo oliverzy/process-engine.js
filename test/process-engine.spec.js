@@ -1,3 +1,4 @@
+var expect = require('chai').expect;
 var processEngine = require('../').processEngine;
 var ProcessDefinition = require('../').ProcessDefinition;
 var ProcessInstance = require('../').ProcessInstance;
@@ -38,8 +39,8 @@ describe('simple process', function() {
         events.push(task.type);
     });
     processInstance.on('end', function () {
-      expect(events[0]).toEqual('start-task');
-      expect(events[1]).toEqual('service-task');
+      expect(events[0]).to.equal('start-task');
+      expect(events[1]).to.equal('service-task');
       done();
     });
 
@@ -96,9 +97,9 @@ describe('simple parallel process', function() {
         events.push(task.type);
     });
     processInstance.on('end', function () {
-      expect(events[0]).toEqual('start-task');
-      expect(events[1]).toEqual('service-task');
-      expect(events[2]).toEqual('service-task');
+      expect(events[0]).to.equal('start-task');
+      expect(events[1]).to.equal('service-task');
+      expect(events[2]).to.equal('service-task');
       done();
     });
 
@@ -123,13 +124,13 @@ describe('simple exclusive gateway process', function() {
     processDefinition.addTask(decision);
 
     var serviceTask1 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task1', variables);
+      console.log('Oh, service task10', variables);
       complete();
     });
     processDefinition.addTask(serviceTask1);
 
     var serviceTask2 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task2', variables);
+      console.log('Oh, service task20', variables);
       complete();
     });
     processDefinition.addTask(serviceTask2);
@@ -168,9 +169,9 @@ describe('simple exclusive gateway process', function() {
         events.push(task);
     });
     processInstance.on('end', function () {
-      expect(events[0]).toEqual('start-task');
-      expect(events[1].type).toEqual('service-task');
-      expect(events[1].id).toEqual(3);
+      expect(events[0]).to.equal('start-task');
+      expect(events[1].type).to.equal('service-task');
+      expect(events[1].id).to.equal(3);
       done();
     });
 
@@ -253,9 +254,9 @@ describe('exclusive gateway + parrallel gateway process', function() {
         events.push(task.name);
     });
     processInstance.on('end', function () {
-      expect(events[0]).toEqual('start-task');
-      expect(events).toContain('parallelTask');
-      expect(events).toContain('serviceTask2');
+      expect(events[0]).to.equal('start-task');
+      expect(events).to.contain('parallelTask');
+      expect(events).to.contain('serviceTask2');
       done();
     });
 
@@ -265,7 +266,7 @@ describe('exclusive gateway + parrallel gateway process', function() {
 
 
 /**
- * start -> human task -> end
+ * start -> service task -> human task -> end
  */
 describe('simple human process', function() {
   function createProcessDefinition() {
@@ -274,11 +275,18 @@ describe('simple human process', function() {
     processDefinition.addTask(startTask);
     var humanTask = processBuilder.humanTask();
     humanTask.name = 'humanTask';
+    humanTask.assignee = 'Oliver Zhou';
     processDefinition.addTask(humanTask);
+    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
+      console.log('Oh, service task before human task');
+      complete();
+    });
+    processDefinition.addTask(serviceTask);
 
     var endTask = processBuilder.endTask();
     processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, humanTask);
+    processDefinition.addFlow(startTask, serviceTask);
+    processDefinition.addFlow(serviceTask, humanTask);
     processDefinition.addFlow(humanTask, endTask);
 
     return processDefinition;
@@ -298,8 +306,8 @@ describe('simple human process', function() {
         events.push(task.type);
     });
     processInstance.on('end', function () {
-      expect(events[0]).toEqual('start-task');
-      expect(events[1]).toEqual('human-task');
+      expect(events[0]).to.equal('start-task');
+      expect(events[1]).to.equal('human-task');
       done();
     });
 
@@ -307,6 +315,70 @@ describe('simple human process', function() {
     // Simulate Human Task Complete
     setTimeout(function () {
       processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
+    }, 500);
+  });
+});
+
+
+/**
+ * start -> service task -> human task -> end
+ */
+describe('simple human process persistence', function() {
+  var humanTaskId;
+  function createProcessDefinition() {
+    var processDefinition = new ProcessDefinition();
+    var startTask = processBuilder.startTask();
+    processDefinition.addTask(startTask);
+    var humanTask = processBuilder.humanTask();
+    humanTask.name = 'humanTask';
+    humanTask.assignee = 'Oliver Zhou';
+    processDefinition.addTask(humanTask);
+    humanTaskId = humanTask.id;
+    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
+      console.log('Oh, service task');
+      complete();
+    });
+    processDefinition.addTask(serviceTask);
+
+    var endTask = processBuilder.endTask();
+    processDefinition.addTask(endTask);
+    processDefinition.addFlow(startTask, serviceTask);
+    processDefinition.addFlow(serviceTask, humanTask);
+    processDefinition.addFlow(humanTask, endTask);
+
+    return processDefinition;
+  }
+
+  var processInstance;
+  beforeEach(function() {
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+  });
+
+  it('should pass', function(done) {
+    var processInstanceId = processInstance.id;
+    var events = [];
+    processInstance.on('before', function (task) {
+      if (task.type === 'start-task')
+        events.push(task.type);
+      else if (task.type === 'human-task')
+        events.push(task.type);
+    });
+
+    processInstance.start();
+    // Simulate Human Task Complete
+    setTimeout(function () {
+      processEngine.clearPool();
+      expect(processEngine.processPool[processInstanceId]).to.not.exist;
+      processEngine.loadProcessInstance(processInstanceId).done(function (instance) {
+        //console.log(util.inspect(instance, {depth: 5}));
+        instance.on('end', function () {
+          console.log('Loaded process instance is ended!');
+          expect(events[0]).to.equal('start-task');
+          expect(events[1]).to.equal('human-task');
+          done();
+        });
+        processEngine.completeTask(processInstanceId, humanTaskId);
+      });
     }, 500);
   });
 });
