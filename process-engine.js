@@ -177,12 +177,12 @@ ProcessEngine.prototype.createProcessInstance = function (def) {
 
 ProcessEngine.prototype.completeTask = function (processId, taskId) {
   if (!this.processPool[processId]) {
-    this.loadProcessInstance(processId).done(function (instance) {
+    return this.loadProcessInstance(processId).done(function (instance) {
       this.processPool[processId].nodePool[taskId].complete();
     }.bind(this));
   }
   else
-    this.processPool[processId].nodePool[taskId].complete();
+    return Q(this.processPool[processId].nodePool[taskId].complete());
 };
 
 ProcessEngine.prototype.saveProcessInstance = function (entity) {

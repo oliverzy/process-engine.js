@@ -3,6 +3,7 @@ var processEngine = require('../').processEngine;
 var ProcessDefinition = require('../').ProcessDefinition;
 var ProcessInstance = require('../').ProcessInstance;
 var processBuilder = require('../').processBuilder;
+var humanTaskService = require('../').humanTaskService;
 
 /**
  * start -> service task -> end
@@ -314,8 +315,9 @@ describe('simple human process', function() {
     processInstance.start();
     // Simulate Human Task Complete
     setTimeout(function () {
-      processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
-    }, 500);
+      humanTaskService.complete(processInstance.getNode('humanTask').entityId);
+      //processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
+    }, 300);
   });
 });
 
@@ -324,7 +326,6 @@ describe('simple human process', function() {
  * start -> service task -> human task -> end
  */
 describe('simple human process persistence', function() {
-  var humanTaskId;
   function createProcessDefinition() {
     var processDefinition = new ProcessDefinition();
     var startTask = processBuilder.startTask();
@@ -333,7 +334,6 @@ describe('simple human process persistence', function() {
     humanTask.name = 'humanTask';
     humanTask.assignee = 'Oliver Zhou';
     processDefinition.addTask(humanTask);
-    humanTaskId = humanTask.id;
     var serviceTask = processBuilder.serviceTask(function (variables, complete) {
       console.log('Oh, service task');
       complete();
@@ -377,9 +377,10 @@ describe('simple human process persistence', function() {
           expect(events[1]).to.equal('human-task');
           done();
         });
-        processEngine.completeTask(processInstanceId, humanTaskId);
+        humanTaskService.complete(processInstance.getNode('humanTask').entityId);
+        //processEngine.completeTask(processInstanceId, humanTaskId);
       });
-    }, 500);
+    }, 300);
   });
 });
 

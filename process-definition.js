@@ -11,6 +11,7 @@ var Q = require('q');
 */
 function Task(type) {
   this.id = null;
+  this.name = null;
   this.type = type;
   this.incomingFlows = [];
   this.outgoingFlows = [];
