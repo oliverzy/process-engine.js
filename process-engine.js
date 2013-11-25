@@ -5,6 +5,7 @@ _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
 var Q = require('q');
+var debug = require('debug')('process-engine');
 
 var ProcessDefinition = require('./process-definition.js').ProcessDefinition;
 var processBuilder = require('./process-definition.js').processBuilder;
@@ -194,6 +195,7 @@ ProcessEngine.prototype.saveProcessInstance = function (entity) {
 };
 
 ProcessEngine.prototype.loadProcessInstance = function (id) {
+  debug('loading instance: %s', id);
   return Q.ninvoke(this.instanceCollection, 'find', {id: id}).then(function (entities) {
     console.log('Load:', entities);
     if (entities.length === 0) return;
@@ -263,7 +265,7 @@ ProcessInstance.prototype.changeStatus = function (status) {
 ProcessInstance.prototype.savePoint = function () {
   var entity = this.serialize();
   return processEngine.saveProcessInstance(entity).then(function (entity) {
-    //console.log(util.inspect(entity, {depth: 5, colors: false}));
+    debug('saving instance: %s', util.inspect(entity, {depth: 5, colors: false}));
     return entity;
   });
 };
