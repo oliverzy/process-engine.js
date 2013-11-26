@@ -65,7 +65,7 @@ HumanTaskService.STATUS = {
   // only has single candidate || one of candidates claims the task
   RESERVED: 'Reserved',
   // the assignee starts to work on the task
-  IN_PROGRESS: 'InProgress',
+  IN_PROGRESS: 'In Progress',
   COMPLETED: 'Completed'
 };
 HumanTaskService.prototype.complete = function (taskId) {
@@ -81,6 +81,7 @@ HumanTaskService.prototype.complete = function (taskId) {
 
 HumanTaskService.prototype.newTask = function (taskDef) {
   var task = {
+    name: taskDef.name,
     status: taskDef.assignee ? HumanTaskService.STATUS.RESERVED: HumanTaskService.STATUS.NEW,
     assignee: taskDef.assignee,
     candidateUsers: taskDef.candidateUsers,
@@ -106,6 +107,14 @@ HumanTaskService.prototype.claim = function (taskId, user) {
       task.status = HumanTaskService.STATUS.IN_PROGRESS;
       return this.saveTask(task);
     }
+  }.bind(this));
+};
+
+HumanTaskService.prototype.startWorking = function (taskId) {
+  return this.queryOne({'_id': taskId}).then(function (task) {
+    if (!task) throw new Error('No task is found!');
+    task.status = HumanTaskService.STATUS.IN_PROGRESS;
+    return this.saveTask(task);
   }.bind(this));
 };
 
