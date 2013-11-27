@@ -176,6 +176,7 @@ ProcessEngine.prototype.createProcessInstance = function (def) {
 };
 
 ProcessEngine.prototype.completeTask = function (processId, taskId) {
+  debug('Complete', processId, taskId);
   if (!this.processPool[processId]) {
     return this.loadProcessInstance(processId).done(function (instance) {
       this.processPool[processId].nodePool[taskId].complete();
@@ -196,12 +197,13 @@ ProcessEngine.prototype.saveProcessInstance = function (entity) {
 
 ProcessEngine.prototype.loadProcessInstance = function (id) {
   debug('loading instance: %s', id);
-  return Q.ninvoke(this.instanceCollection, 'find', {id: id}).then(function (entities) {
-    console.log('Load:', entities);
-    if (entities.length === 0) return;
-    var instance = ProcessInstance.deserialize(entities[0]);
-    this.processPool[instance.id] = instance;
-    return instance;
+  return Q.ninvoke(this.instanceCollection, 'findOne', {id: id}).then(function (entity) {
+    debug('Load:', entity);
+    if (!entity) return;
+    return ProcessInstance.deserialize(entity).then(function(instance) {
+      this.processPool[instance.id] = instance;
+      return instance;
+    }.bind(this));
   }.bind(this));
 };
 
@@ -246,7 +248,7 @@ ProcessInstance.prototype.getNode = function (taskName) {
   }
 };
 
-ProcessInstance.prototype.start = function (variables) {
+ProcessInstance.prototype._start = function (variables) {
   this.status = ProcessInstance.STATUS.RUNNING;
   this.on('end', function () {
     this.status = ProcessInstance.STATUS.COMPLETED;
@@ -254,6 +256,22 @@ ProcessInstance.prototype.start = function (variables) {
   this.variables = variables;
   var node = new Node(this.def.tasks[0], this);
   node.execute();
+};
+
+/**
+ * Start the process instance with variables
+ * If the process definition is not saved, just save it right now
+ * @param  {[type]} variables [description]
+ * @return {[type]}           [description]
+ */
+ProcessInstance.prototype.start = function (variables) {
+  if (!this.def._id)
+    this.def.save().done(function(def) {
+      this.def._id = def._id;
+      this._start(variables);
+    }.bind(this));
+  else
+    this._start(variables);
 };
 
 ProcessInstance.prototype.changeStatus = function (status) {
@@ -281,7 +299,7 @@ ProcessInstance.prototype.serialize = function () {
 
   var entity = {
     id: this.id,
-    def: this.def.serialize(),
+    def: this.def._id,
     status: this.status,
     nodePool: serializeNodePool(),
     variables: this.variables
@@ -290,16 +308,19 @@ ProcessInstance.prototype.serialize = function () {
 };
 
 ProcessInstance.deserialize = function (entity) {
-  var instance = new ProcessInstance();
-  instance.id = entity.id;
-  instance.def = ProcessDefinition.deserialize(entity.def);
-  instance.status = entity.status;
-  instance.variables = entity.variables;
-  entity.nodePool.forEach(function (entity) {
-    var node = Node.deserialize(entity, instance);
-    instance.nodePool[node.task.id] = node;
+  return ProcessDefinition.load(entity.def).then(function (def) {
+    var instance = new ProcessInstance();
+    instance.id = entity.id;
+    instance.def = def;
+    instance.status = entity.status;
+    instance.variables = entity.variables;
+    entity.nodePool.forEach(function (entity) {
+      var node = Node.deserialize(entity, instance);
+      instance.nodePool[node.task.id] = node;
+    });
+
+    return instance;
   });
-  return instance;
 };
 
 

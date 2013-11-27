@@ -6,6 +6,7 @@ _.mixin(_.str.exports());
 var Datastore = require('nedb');
 var Q = require('q');
 
+var definitionCollection = new Datastore();
 /**
 * [CORE] Task Definition: Represent a abstract task in the process definition
 */
@@ -138,20 +139,24 @@ ProcessDefinition.prototype.addFlow = function (taskFrom, taskTo, condition) {
 };
 
 ProcessDefinition.prototype.serialize = function () {
-  var entities = [];
+  var tasks = [];
   _.forOwn(this.tasks, function (task) {
-    entities.push(task.serialize());
+    tasks.push(task.serialize());
   }, this);
-  return entities;
+
+  var entity = {
+    tasks: tasks
+  };
+  return entity;
 };
 
 ProcessDefinition.deserialize = function (entity) {
   var def = new ProcessDefinition();
-  entity.forEach(function (taskEntity) {
+  entity.tasks.forEach(function (taskEntity) {
     def.addTask(Task.deserialize(taskEntity));
   });
 
-  entity.forEach(function (taskEntity) {
+  entity.tasks.forEach(function (taskEntity) {
     function deserializeFlow(flow) {
       var deserializedFlow = {
         from: def.tasks[flow.from],
@@ -170,6 +175,22 @@ ProcessDefinition.deserialize = function (entity) {
   });
 
   return def;
+};
+
+ProcessDefinition.prototype.save = function () {
+  var entity = this.serialize();
+  if (entity._id)
+    return Q.ninvoke(definitionCollection, 'update', {'_id': entity._id}, entity, {}).then(function() {
+      return entity;
+    });
+  else
+    return Q.ninvoke(definitionCollection,'insert', entity);
+};
+
+ProcessDefinition.load = function (id) {
+  return Q.ninvoke(definitionCollection, 'findOne', {'_id': id}).then(function (entity) {
+    return ProcessDefinition.deserialize(entity);
+  });
 };
 
 

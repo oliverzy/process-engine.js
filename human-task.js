@@ -73,7 +73,7 @@ HumanTaskService.prototype.complete = function (taskId) {
     if (!task) throw new Error('No task is found!');
     task.status = HumanTaskService.STATUS.COMPLETED;
     return this.saveTask(task).then(function () {
-      if (task.processId)
+      if (task.processId !== undefined)
         processEngine.completeTask(task.processId, task.taskDefId);
     });
   }.bind(this));
