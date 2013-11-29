@@ -200,7 +200,7 @@ ProcessEngine.prototype.loadProcessInstance = function (id) {
   return Q.ninvoke(this.instanceCollection, 'findOne', {id: id}).then(function (entity) {
     debug('Load:', entity);
     if (!entity) return;
-    return ProcessInstance.load(entity).then(function(instance) {
+    return ProcessInstance.deserialize(entity).then(function(instance) {
       this.processPool[instance.id] = instance;
       return instance;
     }.bind(this));
@@ -307,7 +307,10 @@ ProcessInstance.prototype.serialize = function () {
   return entity;
 };
 
-ProcessInstance.load = function (entity) {
+/**
+ * @return {[Promise]}
+ */
+ProcessInstance.deserialize = function (entity) {
   return ProcessDefinition.load(entity.def).then(function (def) {
     var instance = new ProcessInstance();
     instance.id = entity.id;

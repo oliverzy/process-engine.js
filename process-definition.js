@@ -5,6 +5,9 @@ _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
 var Q = require('q');
+var joint = require('jointjs');
+var dagre = require('dagre');
+var layoutHelper = require('./lib/joint.layout.DirectedGraph.js');
 
 var definitionCollection = new Datastore();
 /**
@@ -56,6 +59,16 @@ Task.deserialize = function (entity) {
   return task;
 };
 
+Task.prototype.render = function () {
+  var circle = new joint.shapes.basic.Circle({
+    //position: { x: 100, y: 30 },
+    size: { width: 30, height: 30 },
+    attrs: { circle: {fill: this.type == 'start-task' ? 'red' : 'green'} }
+  });
+
+  return circle;
+};
+
 /**
  * Exclusive Gateway
  */
@@ -65,12 +78,70 @@ function Decision() {
 }
 util.inherits(Decision, Task);
 
+var DecisionElement = joint.dia.Element.extend({
+
+  markup: '<g class="rotatable"><g class="scalable"><polygon class="outer"/><polygon class="inner"/></g><text/></g>',
+
+  defaults: joint.util.deepSupplement({
+
+    type: 'basic.Decision',
+    size: {
+      width: 80,
+      height: 80
+    },
+    attrs: {
+      '.outer': {
+        fill: '#3498DB',
+        stroke: '#2980B9',
+        'stroke-width': 2,
+        points: '40,0 80,40 40,80 0,40'
+      },
+      '.inner': {
+        fill: '#3498DB',
+        stroke: '#2980B9',
+        'stroke-width': 2,
+        points: '40,5 75,40 40,75 5,40',
+        display: 'none'
+      },
+      text: {
+        text: 'Decision',
+        'font-family': 'Arial',
+        'font-size': 12,
+        ref: '.',
+        'ref-x': 0.5,
+        'ref-y': 0.5,
+        'x-alignment': 'middle',
+        'y-alignment': 'middle'
+      }
+    }
+
+  }, joint.dia.Element.prototype.defaults)
+});
+
+Decision.prototype.render = function () {
+  var decision = new DecisionElement({
+    //position: { x: 320, y: 25},
+    size: {width: 70, height: 40}
+  });
+
+  return decision;
+};
+
 function ServiceTask(action) {
   ServiceTask.super_.apply(this, arguments);
   this.type = 'service-task';
   this.action = action;
 }
 util.inherits(ServiceTask, Task);
+
+ServiceTask.prototype.render = function () {
+  var service = new joint.shapes.basic.Rect({
+      //position: { x: 180, y: 30 },
+      size: { width: 100, height: 30 },
+      attrs: { rect: { fill: 'blue' }, text: { text: this.name ? this.name : 'service', fill: 'white' } }
+    });
+  return service;
+};
 
 ServiceTask.prototype.serialize = function () {
   var entity = ServiceTask.super_.prototype.serialize.call(this);
@@ -111,9 +182,11 @@ var processBuilder = new ProcessBuilder();
 /**
  * [CORE] The definiton of the process which can be executed by process engine
  */
-function ProcessDefinition() {
+function ProcessDefinition(name) {
+  this.name = name;
   this.tasks = {};
   this.nextTaskId = 0;
+  this.layout = null;
 }
 
 ProcessDefinition.prototype.addTask = function (task) {
@@ -145,13 +218,19 @@ ProcessDefinition.prototype.serialize = function () {
   }, this);
 
   var entity = {
-    tasks: tasks
+    name: this.name,
+    tasks: tasks,
+    layout: this.layout ? this.layout : this.render().toJSON()
   };
+
   return entity;
 };
 
 ProcessDefinition.deserialize = function (entity) {
   var def = new ProcessDefinition();
+  def.name = entity.name;
+  var graph = new joint.dia.Graph();
+  def.layout = graph.fromJSON(entity.layout);
   entity.tasks.forEach(function (taskEntity) {
     def.addTask(Task.deserialize(taskEntity));
   });
@@ -191,6 +270,43 @@ ProcessDefinition.load = function (id) {
   return Q.ninvoke(definitionCollection, 'findOne', {'_id': id}).then(function (entity) {
     return ProcessDefinition.deserialize(entity);
   });
+};
+
+ProcessDefinition.query = function (conditions) {
+  return Q.ninvoke(definitionCollection, 'find', conditions);
+};
+
+/**
+ * Create JointJS Graph and then use Dagre to do automatic layout
+ * @return {joint.dia.Graph}
+ */
+ProcessDefinition.prototype.render = function () {
+  var graph = new joint.dia.Graph();
+
+  _.forOwn(this.tasks, function (task) {
+    var cell = task.render();
+    graph.addCell(cell);
+    task.cell = cell;
+  }, this);
+
+  _.forOwn(this.tasks, function (task) {
+    task.outgoingFlows.forEach(function (flow) {
+      var link = new joint.dia.Link({
+        source: { id: flow.from.cell.id },
+        target: { id: flow.to.cell.id },
+        manhattan: true,
+        toolMarkup: '<g></g>'
+        // labels: [
+        //   { position: 0.6, attrs: { text: { text: 'Yes', fill: 'brown', 'font-family': 'sans-serif' }}}
+        // ]
+      });
+      graph.addCell(link);
+    });
+  }, this);
+
+  layoutHelper.layout(graph, { setLinkVertices: false, rankDir: 'LR', rankSep: 50 });
+  //console.log(graph.toJSON());
+  return graph;
 };
 
 
