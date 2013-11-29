@@ -218,9 +218,10 @@ ProcessDefinition.prototype.serialize = function () {
   }, this);
 
   var entity = {
+    _id: this._id,
     name: this.name,
     tasks: tasks,
-    layout: this.layout ? this.layout : this.render().toJSON()
+    layout: this.layout ? this.layout.toJSON() : this.render().toJSON()
   };
 
   return entity;
@@ -228,9 +229,13 @@ ProcessDefinition.prototype.serialize = function () {
 
 ProcessDefinition.deserialize = function (entity) {
   var def = new ProcessDefinition();
+  def._id = entity._id;
   def.name = entity.name;
-  var graph = new joint.dia.Graph();
-  def.layout = graph.fromJSON(entity.layout);
+  if (entity.layout) {
+    var graph = new joint.dia.Graph();
+    graph.fromJSON(entity.layout);
+    def.layout = graph;
+  }
   entity.tasks.forEach(function (taskEntity) {
     def.addTask(Task.deserialize(taskEntity));
   });
