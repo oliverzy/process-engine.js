@@ -90,7 +90,7 @@ Node.prototype.complete = function (variables) {
       // If Process instance status has been suspended, need to save again because it's possile that
       // an async service task is started before the instance is suspended
       if (this.processInstance.status === ProcessInstance.STATUS.WAITING)
-        this.processInstance.savePoint().done();
+        this.processInstance.save().done();
     }
   }.bind(this));
 
@@ -192,15 +192,6 @@ ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
     return Q(this.processPool[processId].nodePool[taskId].complete());
 };
 
-ProcessEngine.prototype.saveProcessInstance = function (entity) {
-  if (entity._id)
-    return Q.ninvoke(this.instanceCollection, 'update', {'_id': entity._id}, entity, {}).then(function () {
-      return entity;
-    });
-  else
-    return Q.ninvoke(this.instanceCollection, 'insert', entity);
-};
-
 ProcessEngine.prototype.loadProcessInstance = function (id) {
   debug('loading instance: %s', id);
   return Q.ninvoke(this.instanceCollection, 'findOne', {id: id}).then(function (entity) {
@@ -211,6 +202,10 @@ ProcessEngine.prototype.loadProcessInstance = function (id) {
       return instance;
     }.bind(this));
   }.bind(this));
+};
+
+ProcessEngine.prototype.queryProcessInstances = function (conditions) {
+  return Q.ninvoke(this.instanceCollection, 'find', conditions);
 };
 
 ProcessEngine.prototype.clearPool = function () {
@@ -283,16 +278,20 @@ ProcessInstance.prototype.start = function (variables) {
  */
 ProcessInstance.prototype.changeStatus = function (status) {
   this.status = status;
-  return this.savePoint();
+  return this.save();
 };
 
-ProcessInstance.prototype.savePoint = function () {
+ProcessInstance.prototype.save = function () {
   var entity = this.serialize();
-  return processEngine.saveProcessInstance(entity).then(function (entity) {
-    debug('saving instance: %s', util.inspect(entity, {depth: 5, colors: false}));
-    this._id = entity._id;
-    return this;
-  }.bind(this));
+  if (entity._id)
+    return Q.ninvoke(processEngine.instanceCollection, 'update', {'_id': entity._id}, entity, {}).then(function () {
+      return entity;
+    });
+  else
+    return Q.ninvoke(processEngine.instanceCollection, 'insert', entity).then(function (entity) {
+      this._id = entity._id;
+      return this;
+    }.bind(this));
 };
 
 ProcessInstance.prototype.serialize = function () {

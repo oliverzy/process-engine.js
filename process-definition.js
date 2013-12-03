@@ -26,11 +26,12 @@ Task.prototype.serialize = function () {
     return {
         from: flow.from.id,
         to: flow.to.id,
-        condition: this.condition ? this.condition.toString() : null
+        condition: flow.condition ? flow.condition.toString() : null
       };
   }
   var entity = {
     id: this.id,
+    name: this.name,
     type: this.type,
     incomingFlows: this.incomingFlows.map(function (flow) {
       return handleFlow(flow);
@@ -44,6 +45,7 @@ Task.prototype.serialize = function () {
 
 Task.prototype.deserialize = function (entity) {
   this.id = entity.id;
+  this.name = entity.name;
   this.type = entity.type;
 };
 
@@ -187,6 +189,7 @@ function ProcessDefinition(name) {
   this.tasks = {};
   this.nextTaskId = 0;
   this.layout = null;
+  this.variables = {};
 }
 
 ProcessDefinition.prototype.addTask = function (task) {
@@ -221,7 +224,8 @@ ProcessDefinition.prototype.serialize = function () {
     _id: this._id,
     name: this.name,
     tasks: tasks,
-    layout: this.layout ? this.layout.toJSON() : this.render().toJSON()
+    layout: this.layout ? this.layout.toJSON() : this.render().toJSON(),
+    variables: this.variables
   };
 
   return entity;
@@ -231,6 +235,7 @@ ProcessDefinition.deserialize = function (entity) {
   var def = new ProcessDefinition();
   def._id = entity._id;
   def.name = entity.name;
+  def.variables = entity.variables;
   if (entity.layout) {
     var graph = new joint.dia.Graph();
     graph.fromJSON(entity.layout);
@@ -268,7 +273,10 @@ ProcessDefinition.prototype.save = function () {
       return entity;
     });
   else
-    return Q.ninvoke(definitionCollection,'insert', entity);
+    return Q.ninvoke(definitionCollection,'insert', entity).then(function (entity) {
+      this._id = entity._id;
+      return this;
+    }.bind(this));
 };
 
 ProcessDefinition.load = function (id) {
