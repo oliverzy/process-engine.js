@@ -62,7 +62,9 @@ Node.prototype.canExecuteNode = function () {
 /**
  * The method is called when the node execution is done
  */
-Node.prototype.complete = function () {
+Node.prototype.complete = function (variables) {
+  if (variables)
+    this.processInstance.variables = _.clone(variables, true);
   this.processInstance.emit('after', this.task);
   delete this.processInstance.nodePool[this.task.id];
 
@@ -84,11 +86,19 @@ Node.prototype.complete = function () {
     // Need to decide whether to execute next node
     if (node.canExecuteNode()) {
       node.execute();
+    } else {
+      // If Process instance status has been suspended, need to save again because it's possile that
+      // an async service task is started before the instance is suspended
+      if (this.processInstance.status === ProcessInstance.STATUS.WAITING)
+        this.processInstance.savePoint().done();
     }
   }.bind(this));
 
-  if (this.task.type === 'end-task')
-    this.processInstance.emit('end');
+  if (this.task.type === 'end-task') {
+    this.processInstance.changeStatus(ProcessInstance.STATUS.COMPLETED).done(function () {
+      this.processInstance.emit('end');
+    }.bind(this));
+  }
 };
 
 Node.prototype.serialize = function () {
@@ -128,10 +138,6 @@ ServiceNode.prototype.executeInternal = function (complete) {
 };
 
 ServiceNode.prototype.canFollowOutgoingFlow = function (flow) {
-  // If Process instance status has been suspended, need to save again because it's possile that
-  // an async service task is started before the instance is suspended
-  if (this.processInstance.status === ProcessInstance.STATUS.WAITING)
-    this.processInstance.savePoint().done();
   return ServiceNode.super_.prototype.canFollowOutgoingFlow.call(this, flow);
 };
 
@@ -175,11 +181,11 @@ ProcessEngine.prototype.createProcessInstance = function (def) {
   return processInstance;
 };
 
-ProcessEngine.prototype.completeTask = function (processId, taskId) {
+ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
   debug('Complete', processId, taskId);
   if (!this.processPool[processId]) {
     return this.loadProcessInstance(processId).done(function (instance) {
-      this.processPool[processId].nodePool[taskId].complete();
+      this.processPool[processId].nodePool[taskId].complete(variables);
     }.bind(this));
   }
   else
@@ -249,13 +255,11 @@ ProcessInstance.prototype.getNode = function (taskName) {
 };
 
 ProcessInstance.prototype._start = function (variables) {
-  this.status = ProcessInstance.STATUS.RUNNING;
-  this.on('end', function () {
-    this.status = ProcessInstance.STATUS.COMPLETED;
-  });
   this.variables = variables;
-  var node = new Node(this.def.tasks[0], this);
-  node.execute();
+  return this.changeStatus(ProcessInstance.STATUS.RUNNING).done(function () {
+    var node = new Node(this.def.tasks[0], this);
+    node.execute();
+  }.bind(this));
 };
 
 /**
@@ -274,18 +278,21 @@ ProcessInstance.prototype.start = function (variables) {
     this._start(variables);
 };
 
+/**
+ * @return {Promise}
+ */
 ProcessInstance.prototype.changeStatus = function (status) {
   this.status = status;
-  if (status === ProcessInstance.STATUS.WAITING)
-    this.savePoint().done();
+  return this.savePoint();
 };
 
 ProcessInstance.prototype.savePoint = function () {
   var entity = this.serialize();
   return processEngine.saveProcessInstance(entity).then(function (entity) {
     debug('saving instance: %s', util.inspect(entity, {depth: 5, colors: false}));
-    return entity;
-  });
+    this._id = entity._id;
+    return this;
+  }.bind(this));
 };
 
 ProcessInstance.prototype.serialize = function () {
@@ -298,6 +305,7 @@ ProcessInstance.prototype.serialize = function () {
   }.bind(this);
 
   var entity = {
+    _id: this._id,
     id: this.id,
     def: this.def._id,
     status: this.status,

@@ -60,11 +60,11 @@ util.inherits(HumanTaskNode, Node);
 HumanTaskNode.prototype.executeInternal = function (complete) {
   var taskDef = {processId: this.processInstance.id};
   _.extend(taskDef, this.task);
-  humanTaskService.newTask(taskDef).done(function (entity) {
+  humanTaskService.newTask(taskDef).then(function (entity) {
     this.entityId = entity._id;
     // Put it in the waiting status
-    this.processInstance.changeStatus(ProcessInstance.STATUS.WAITING);
-  }.bind(this));
+    return this.processInstance.changeStatus(ProcessInstance.STATUS.WAITING);
+  }.bind(this)).done();
 };
 
 function HumanTaskService() {
@@ -78,13 +78,13 @@ HumanTaskService.STATUS = {
   IN_PROGRESS: 'In Progress',
   COMPLETED: 'Completed'
 };
-HumanTaskService.prototype.complete = function (taskId) {
+HumanTaskService.prototype.complete = function (taskId, variables) {
   return this.queryOne({'_id': taskId}).then(function (task) {
     if (!task) throw new Error('No task is found!');
     task.status = HumanTaskService.STATUS.COMPLETED;
     return this.saveTask(task).then(function () {
       if (task.processId !== undefined)
-        processEngine.completeTask(task.processId, task.taskDefId);
+        processEngine.completeTask(task.processId, task.taskDefId, variables);
     });
   }.bind(this));
 };

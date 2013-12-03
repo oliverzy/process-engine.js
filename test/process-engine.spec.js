@@ -42,6 +42,10 @@ describe('simple process', function() {
     processInstance.on('end', function () {
       expect(events[0]).to.equal('start-task');
       expect(events[1]).to.equal('service-task');
+      processEngine.loadProcessInstance(processInstance.id).done(function (instance) {
+        expect(instance.status).to.be.equal(ProcessInstance.STATUS.COMPLETED);
+      });
+
       done();
     });
 
