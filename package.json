@@ -1,7 +1,7 @@
 {
   "name": "process-engine",
   "version": "0.0.0",
-  "description": "Javascript Process Engine inspired by jBPM5/Activiti",
+  "description": "Javascript Process Engine inspired by jBPM5/Camunda BPM",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

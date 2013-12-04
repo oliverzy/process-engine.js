@@ -224,7 +224,7 @@ ProcessDefinition.prototype.serialize = function () {
     _id: this._id,
     name: this.name,
     tasks: tasks,
-    layout: this.layout ? this.layout.toJSON() : this.render().toJSON(),
+    layout: this.layout ? JSON.stringify(this.layout.toJSON()) : JSON.stringify(this.render().toJSON()),
     variables: this.variables
   };
 
@@ -238,7 +238,7 @@ ProcessDefinition.deserialize = function (entity) {
   def.variables = entity.variables;
   if (entity.layout) {
     var graph = new joint.dia.Graph();
-    graph.fromJSON(entity.layout);
+    graph.fromJSON(JSON.parse(entity.layout));
     def.layout = graph;
   }
   entity.tasks.forEach(function (taskEntity) {
@@ -308,11 +308,16 @@ ProcessDefinition.prototype.render = function () {
         source: { id: flow.from.cell.id },
         target: { id: flow.to.cell.id },
         manhattan: true,
-        toolMarkup: '<g></g>'
+        toolMarkup: '<g></g>',
         // labels: [
         //   { position: 0.6, attrs: { text: { text: 'Yes', fill: 'brown', 'font-family': 'sans-serif' }}}
         // ]
-      });
+        attrs: {
+          '.marker-target': {
+              d: 'M 10 0 L 0 5 L 10 10 z'
+            }
+          }
+        });
       graph.addCell(link);
     });
   }, this);
