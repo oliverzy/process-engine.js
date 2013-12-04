@@ -12,7 +12,6 @@ Features
 * Process Instance Management
 
 Roadmap
-* Exclusive/Parallel Gateway with circle
 * Human Task Form
 * User Management Service
 * Sub Process

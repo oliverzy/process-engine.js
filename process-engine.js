@@ -189,7 +189,7 @@ ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
     }.bind(this));
   }
   else
-    return Q(this.processPool[processId].nodePool[taskId].complete());
+    return Q(this.processPool[processId].nodePool[taskId].complete(variables));
 };
 
 ProcessEngine.prototype.loadProcessInstance = function (id) {

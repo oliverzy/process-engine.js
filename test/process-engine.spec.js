@@ -321,7 +321,7 @@ describe('simple human process', function() {
     setTimeout(function () {
       humanTaskService.complete(processInstance.getNode('humanTask').entityId);
       //processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
-    }, 300);
+    }, 200);
   });
 });
 
@@ -384,7 +384,82 @@ describe('simple human process persistence', function() {
         humanTaskService.complete(processInstance.getNode('humanTask').entityId);
         //processEngine.completeTask(processInstanceId, humanTaskId);
       });
-    }, 300);
+    }, 200);
+  });
+});
+
+
+/**
+ * start -> service task -> decision-repeat -> human task -> decision -> end
+ *                                    |                        |
+ *                                    |________________________|                                            
+ */
+describe('human process with cycle', function() {
+  function createProcessDefinition() {
+    var processDefinition = new ProcessDefinition('human process with cycle');
+    var startTask = processBuilder.startTask();
+    processDefinition.addTask(startTask);
+    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
+      console.log('Oh, service task before human task');
+      complete();
+    });
+    processDefinition.addTask(serviceTask);
+    var humanTask = processBuilder.humanTask();
+    humanTask.name = 'humanTask';
+    humanTask.assignee = 'Oliver Zhou';
+    processDefinition.addTask(humanTask);
+
+    var decisionRepeat = processBuilder.decision();
+    processDefinition.addTask(decisionRepeat);
+
+    var decision = processBuilder.decision();
+    processDefinition.addTask(decision);
+
+    var endTask = processBuilder.endTask();
+    processDefinition.addTask(endTask);
+    processDefinition.addFlow(startTask, serviceTask);
+    processDefinition.addFlow(serviceTask, decisionRepeat);
+    processDefinition.addFlow(decisionRepeat, humanTask);
+    processDefinition.addFlow(humanTask, decision);
+
+    processDefinition.addFlow(decision, endTask, function(variables) {
+      return variables.score < 10;
+    });
+    processDefinition.addFlow(decision, decisionRepeat, function(variables) {
+      return variables.score >= 10;
+    });
+
+    return processDefinition;
+  }
+
+  var processInstance;
+  beforeEach(function() {
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+  });
+
+  it('should pass', function(done) {
+    var events = [];
+    processInstance.on('before', function (task) {
+      if (task.type === 'start-task')
+        events.push(task.type);
+      else if (task.type === 'human-task')
+        events.push(task.type);
+    });
+    processInstance.on('end', function () {
+      expect(events[0]).to.equal('start-task');
+      expect(events[1]).to.equal('human-task');
+      expect(events[2]).to.equal('human-task');
+      done();
+    });
+
+    processInstance.start();
+    // Simulate Human Task Complete
+    setTimeout(function () {
+      humanTaskService.complete(processInstance.getNode('humanTask').entityId, {score: 20});
+    }, 200);
+    setTimeout(function () {
+      humanTaskService.complete(processInstance.getNode('humanTask').entityId, {score: 0});
+    }, 400);
   });
 });
 
