@@ -31,7 +31,6 @@ HumanTask.prototype.serialize = function () {
   entity.assignee = this.assignee;
   entity.candidateUsers = this.candidateUsers;
   entity.candidateGroups = this.candidateGroups;
-  entity.taskEntityId = this.entityId;
   return entity;
 };
 
@@ -40,7 +39,6 @@ HumanTask.prototype.deserialize = function (entity) {
   this.assignee = entity.assignee;
   this.candidateUsers = entity.candidateUsers;
   this.candidateGroups = entity.candidateGroups;
-  this.entityId = entity.taskEntityId;
 };
 
 HumanTask.prototype.render = function () {
@@ -58,10 +56,14 @@ function HumanTaskNode() {
 util.inherits(HumanTaskNode, Node);
 
 HumanTaskNode.prototype.executeInternal = function (complete) {
-  var taskDef = {processId: this.processInstance.id};
+  var taskDef = {
+    processId: this.processInstance.id,
+    processName: this.processInstance.def.name,
+    processVariables: this.processInstance.variables
+  };
   _.extend(taskDef, this.task);
   humanTaskService.newTask(taskDef).then(function (entity) {
-    this.entityId = entity._id;
+    this.taskEntityId = entity._id;
     // Put it in the waiting status
     return this.processInstance.changeStatus(ProcessInstance.STATUS.WAITING);
   }.bind(this)).done();
@@ -97,6 +99,8 @@ HumanTaskService.prototype.newTask = function (taskDef) {
     candidateUsers: taskDef.candidateUsers,
     candidateGroups: taskDef.candidateGroups,
     processId: taskDef.processId,
+    processName: taskDef.processName,
+    processVariables: taskDef.processVariables,
     taskDefId: taskDef.id
   };
   

@@ -193,6 +193,8 @@ ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
 };
 
 ProcessEngine.prototype.loadProcessInstance = function (id) {
+  if (this.processPool[id])
+    return Q(this.processPool[id]);
   debug('loading instance: %s', id);
   return Q.ninvoke(this.instanceCollection, 'findOne', {id: id}).then(function (entity) {
     debug('Load:', entity);

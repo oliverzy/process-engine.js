@@ -319,7 +319,7 @@ describe('simple human process', function() {
     processInstance.start();
     // Simulate Human Task Complete
     setTimeout(function () {
-      humanTaskService.complete(processInstance.getNode('humanTask').entityId);
+      humanTaskService.complete(processInstance.getNode('humanTask').taskEntityId);
       //processEngine.completeTask(processInstance.id, processInstance.getNode('humanTask').task.id);
     }, 200);
   });
@@ -381,7 +381,7 @@ describe('simple human process persistence', function() {
           expect(events[1]).to.equal('human-task');
           done();
         });
-        humanTaskService.complete(processInstance.getNode('humanTask').entityId);
+        humanTaskService.complete(processInstance.getNode('humanTask').taskEntityId);
         //processEngine.completeTask(processInstanceId, humanTaskId);
       });
     }, 200);
@@ -455,10 +455,10 @@ describe('human process with cycle', function() {
     processInstance.start();
     // Simulate Human Task Complete
     setTimeout(function () {
-      humanTaskService.complete(processInstance.getNode('humanTask').entityId, {score: 20});
+      humanTaskService.complete(processInstance.getNode('humanTask').taskEntityId, {score: 20});
     }, 200);
     setTimeout(function () {
-      humanTaskService.complete(processInstance.getNode('humanTask').entityId, {score: 0});
+      humanTaskService.complete(processInstance.getNode('humanTask').taskEntityId, {score: 0});
     }, 400);
   });
 });

@@ -13,6 +13,7 @@ Features
 
 Roadmap
 * Human Task Form
+* Error Handling
 * User Management Service
 * Sub Process
 
