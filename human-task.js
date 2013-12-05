@@ -101,13 +101,16 @@ HumanTaskService.prototype.newTask = function (taskDef) {
     processId: taskDef.processId,
     processName: taskDef.processName,
     processVariables: taskDef.processVariables,
-    taskDefId: taskDef.id
+    taskDefId: taskDef.id,
+    createdTime: new Date(),
+    modifiedTime: new Date()
   };
   
   return Q.ninvoke(humanTaskCollection, 'insert', task);
 };
 
 HumanTaskService.prototype.saveTask = function (task) {
+  task.modifiedTime = new Date();
   return Q.ninvoke(humanTaskCollection, 'update', {'_id': task._id}, task, {});
 };
 
