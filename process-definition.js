@@ -191,6 +191,7 @@ function ProcessDefinition(name) {
   this.nextTaskId = 0;
   this.layout = null;
   this.variables = {};
+  this.category = "Default";
 }
 
 ProcessDefinition.prototype.addTask = function (task) {
@@ -232,7 +233,8 @@ ProcessDefinition.prototype.serialize = function () {
     name: this.name,
     tasks: tasks,
     layout: layout,
-    variables: this.variables
+    variables: this.variables,
+    category: this.category
   };
 
   return entity;
@@ -243,6 +245,7 @@ ProcessDefinition.deserialize = function (entity) {
   def._id = entity._id;
   def.name = entity.name;
   def.variables = entity.variables;
+  def.category = entity.category;
   if (entity.layout) {
     var graph = new joint.dia.Graph();
     graph.fromJSON(JSON.parse(entity.layout));
