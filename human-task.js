@@ -84,7 +84,7 @@ HumanTaskService.prototype.complete = function (taskId, variables) {
   return this.queryOne({'_id': taskId}).then(function (task) {
     if (!task) throw new Error('No task is found!');
     task.status = HumanTaskService.STATUS.COMPLETED;
-    return this.saveTask(task).then(function () {
+    return this.saveTask(task).done(function () {
       if (task.processId !== undefined)
         processEngine.completeTask(task.processId, task.taskDefId, variables);
     });

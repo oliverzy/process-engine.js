@@ -123,7 +123,8 @@ var DecisionElement = joint.dia.Element.extend({
 Decision.prototype.render = function () {
   var decision = new DecisionElement({
     //position: { x: 320, y: 25},
-    size: {width: 70, height: 40}
+    size: {width: 70, height: 40},
+    attrs: {text: {text: this.name ? this.name : 'decision'}}
   });
 
   return decision;
@@ -220,11 +221,17 @@ ProcessDefinition.prototype.serialize = function () {
     tasks.push(task.serialize());
   }, this);
 
+  var layout;
+  if (this.layout)
+    layout = _.isString(this.layout) ? this.layout : JSON.stringify(this.layout.toJSON());
+  else
+    layout = JSON.stringify(this.render().toJSON());
+
   var entity = {
     _id: this._id,
     name: this.name,
     tasks: tasks,
-    layout: this.layout ? JSON.stringify(this.layout.toJSON()) : JSON.stringify(this.render().toJSON()),
+    layout: layout,
     variables: this.variables
   };
 

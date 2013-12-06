@@ -459,7 +459,7 @@ describe('human process with cycle', function() {
     }, 200);
     setTimeout(function () {
       humanTaskService.complete(processInstance.getNode('humanTask').taskEntityId, {score: 0});
-    }, 400);
+    }, 300);
   });
 });
 
