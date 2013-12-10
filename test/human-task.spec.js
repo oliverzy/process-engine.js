@@ -1,3 +1,5 @@
+var Promise = require("bluebird");
+Promise.longStackTraces();
 var expect = require('chai').expect;
 var humanTaskService = require('../').humanTaskService;
 var STATUS = require('../').status;

@@ -12,8 +12,8 @@
     "lodash": "~2.3.0",
     "nedb": "~0.9.1",
     "underscore.string": "~2.3.3",
-    "q": "~0.9.7",
-    "debug": "~0.7.4"
+    "debug": "~0.7.4",
+    "bluebird": "~0.11.5-0"
   },
   "devDependencies": {
     "chai": "~1.8.1"

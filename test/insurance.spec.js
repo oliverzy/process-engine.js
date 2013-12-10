@@ -1,3 +1,5 @@
+var Promise = require("bluebird");
+Promise.longStackTraces();
 var expect = require('chai').expect;
 var processEngine = require('../').processEngine;
 var ProcessDefinition = require('../').ProcessDefinition;
@@ -24,7 +26,7 @@ describe('Quick Quote Process', function() {
 
     var serviceTask = processBuilder.serviceTask(function (variables, complete) {
       variables.autoUnderwritingResult = variables.age < 60;
-      console.log('Auto underwriting service task result:', variables.autoUnderwritingResult);
+      //console.log('Auto underwriting service task result:', variables.autoUnderwritingResult);
       complete();
     });
     serviceTask.name = 'Auto UW';
@@ -68,21 +70,21 @@ describe('Quick Quote Process', function() {
     processDefinition.addFlow(basicInfo, serviceTask);
     processDefinition.addFlow(serviceTask, decisionAutoUnderwriting);
     processDefinition.addFlow(decisionAutoUnderwriting, manualUnderwriting, function (variables) {
-      console.log(variables);
+      //console.log(variables);
       return !variables.autoUnderwritingResult;
     });
     processDefinition.addFlow(manualUnderwriting, decisionManualUnderwriting);
     processDefinition.addFlow(decisionManualUnderwriting, decisionRepeat, function (variables) {
-      console.log(variables);
+      //console.log(variables);
       return !variables.manualUnderwritingResult;
     });
 
     processDefinition.addFlow(decisionAutoUnderwriting, decisionMerge, function (variables) {
-      console.log(variables);
+      //console.log(variables);
       return variables.autoUnderwritingResult;
     });
     processDefinition.addFlow(decisionManualUnderwriting, decisionMerge, function (variables) {
-      console.log(variables);
+      //console.log(variables);
       return variables.manualUnderwritingResult;
     });
     processDefinition.addFlow(decisionMerge, viewResult);

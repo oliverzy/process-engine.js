@@ -4,7 +4,7 @@ var _ = require('lodash');
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
-var Q = require('q');
+var Promise = require("bluebird");
 var debug = require('debug')('process-engine');
 
 var ProcessDefinition = require('./process-definition.js').ProcessDefinition;
@@ -167,6 +167,7 @@ function ProcessEngine() {
   this.taskTypes = {};
   this.processPool = {};
   this.instanceCollection = new Datastore();
+  Promise.promisifyAll(this.instanceCollection);
 }
 
 ProcessEngine.prototype.registerTaskType = function (type, Task, Node) {
@@ -189,14 +190,14 @@ ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
     }.bind(this));
   }
   else
-    return Q(this.processPool[processId].nodePool[taskId].complete(variables));
+    return Promise.resolve(this.processPool[processId].nodePool[taskId].complete(variables));
 };
 
 ProcessEngine.prototype.loadProcessInstance = function (id) {
   if (this.processPool[id])
-    return Q(this.processPool[id]);
+    return Promise.resolve(this.processPool[id]);
   debug('loading instance: %s', id);
-  return Q.ninvoke(this.instanceCollection, 'findOne', {id: id}).then(function (entity) {
+  return this.instanceCollection.findOneAsync({id: id}).then(function (entity) {
     debug('Load:', entity);
     if (!entity) return;
     return ProcessInstance.deserialize(entity).then(function(instance) {
@@ -207,7 +208,7 @@ ProcessEngine.prototype.loadProcessInstance = function (id) {
 };
 
 ProcessEngine.prototype.queryProcessInstances = function (conditions) {
-  return Q.ninvoke(this.instanceCollection, 'find', conditions);
+  return this.instanceCollection.findAsync(conditions);
 };
 
 ProcessEngine.prototype.clearPool = function () {
@@ -286,11 +287,11 @@ ProcessInstance.prototype.changeStatus = function (status) {
 ProcessInstance.prototype.save = function () {
   var entity = this.serialize();
   if (entity._id)
-    return Q.ninvoke(processEngine.instanceCollection, 'update', {'_id': entity._id}, entity, {}).then(function () {
+    return processEngine.instanceCollection.updateAsync({'_id': entity._id}, entity, {}).then(function () {
       return entity;
     });
   else
-    return Q.ninvoke(processEngine.instanceCollection, 'insert', entity).then(function (entity) {
+    return processEngine.instanceCollection.insertAsync(entity).then(function (entity) {
       this._id = entity._id;
       return this;
     }.bind(this));

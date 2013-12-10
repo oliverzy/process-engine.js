@@ -1,3 +1,5 @@
+var Promise = require("bluebird");
+Promise.longStackTraces();
 var expect = require('chai').expect;
 var processEngine = require('../').processEngine;
 var ProcessDefinition = require('../').ProcessDefinition;

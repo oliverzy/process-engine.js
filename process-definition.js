@@ -4,12 +4,14 @@ var _ = require('lodash');
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
-var Q = require('q');
+var Promise = require("bluebird");
 var joint = require('jointjs');
 var dagre = require('dagre');
 var layoutHelper = require('./lib/joint.layout.DirectedGraph.js');
 
 var definitionCollection = new Datastore();
+Promise.promisifyAll(definitionCollection);
+
 /**
 * [CORE] Task Definition: Represent a abstract task in the process definition
 */
@@ -279,24 +281,24 @@ ProcessDefinition.deserialize = function (entity) {
 ProcessDefinition.prototype.save = function () {
   var entity = this.serialize();
   if (entity._id)
-    return Q.ninvoke(definitionCollection, 'update', {'_id': entity._id}, entity, {}).then(function() {
+    return definitionCollection.updateAsync({'_id': entity._id}, entity, {}).then(function() {
       return entity;
     });
   else
-    return Q.ninvoke(definitionCollection,'insert', entity).then(function (entity) {
+    return definitionCollection.insertAsync(entity).then(function (entity) {
       this._id = entity._id;
       return this;
     }.bind(this));
 };
 
 ProcessDefinition.load = function (id) {
-  return Q.ninvoke(definitionCollection, 'findOne', {'_id': id}).then(function (entity) {
+  return definitionCollection.findOneAsync({'_id': id}).then(function (entity) {
     return ProcessDefinition.deserialize(entity);
   });
 };
 
 ProcessDefinition.query = function (conditions) {
-  return Q.ninvoke(definitionCollection, 'find', conditions);
+  return definitionCollection.findAsync(conditions);
 };
 
 /**

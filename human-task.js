@@ -6,7 +6,7 @@ var ProcessInstance = require('./process-engine.js').ProcessInstance;
 var Task = require('./process-definition.js').Task;
 var Node = require('./process-engine.js').Node;
 var Datastore = require('nedb');
-var Q = require('q');
+var Promise = require("bluebird");
 var debug = require('debug')('human-task');
 var joint = require('jointjs');
 
@@ -16,6 +16,7 @@ var joint = require('jointjs');
  * until the task status is changed to complete
  */
 var humanTaskCollection = new Datastore();
+Promise.promisifyAll(humanTaskCollection);
 
 function HumanTask() {
   HumanTask.super_.apply(this, arguments);
@@ -106,16 +107,16 @@ HumanTaskService.prototype.newTask = function (taskDef) {
     modifiedTime: new Date()
   };
   
-  return Q.ninvoke(humanTaskCollection, 'insert', task);
+  return humanTaskCollection.insertAsync(task);
 };
 
 HumanTaskService.prototype.saveTask = function (task) {
   task.modifiedTime = new Date();
-  return Q.ninvoke(humanTaskCollection, 'update', {'_id': task._id}, task, {});
+  return humanTaskCollection.updateAsync({'_id': task._id}, task, {});
 };
 
 HumanTaskService.prototype.claim = function (taskId, user) {
-  return Q.ninvoke(humanTaskCollection, 'findOne', {'_id': taskId})
+  return humanTaskCollection.findOneAsync({'_id': taskId})
   .then(function (task) {
     if (task) {
       if (task.assignee === user) return;
@@ -136,11 +137,11 @@ HumanTaskService.prototype.startWorking = function (taskId) {
 };
 
 HumanTaskService.prototype.query = function (conditions) {
-  return Q.ninvoke(humanTaskCollection, 'find', conditions);
+  return humanTaskCollection.findAsync(conditions);
 };
 
 HumanTaskService.prototype.queryOne = function (conditions) {
-  return Q.ninvoke(humanTaskCollection, 'findOne', conditions);
+  return humanTaskCollection.findOneAsync(conditions);
 };
 var humanTaskService = new HumanTaskService();
 
