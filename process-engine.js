@@ -182,7 +182,7 @@ ProcessEngine.prototype.createProcessInstance = function (def) {
   return processInstance;
 };
 
-ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
+ProcessEngine.prototype.completeTask = Promise.method(function (processId, taskId, variables) {
   debug('Complete', processId, taskId);
   if (!this.processPool[processId]) {
     return this.loadProcessInstance(processId).done(function (instance) {
@@ -190,12 +190,12 @@ ProcessEngine.prototype.completeTask = function (processId, taskId, variables) {
     }.bind(this));
   }
   else
-    return Promise.resolve(this.processPool[processId].nodePool[taskId].complete(variables));
-};
+    return this.processPool[processId].nodePool[taskId].complete(variables);
+});
 
-ProcessEngine.prototype.loadProcessInstance = function (id) {
+ProcessEngine.prototype.loadProcessInstance = Promise.method(function (id) {
   if (this.processPool[id])
-    return Promise.resolve(this.processPool[id]);
+    return this.processPool[id];
   debug('loading instance: %s', id);
   return this.instanceCollection.findOneAsync({id: id}).then(function (entity) {
     debug('Load:', entity);
@@ -205,7 +205,7 @@ ProcessEngine.prototype.loadProcessInstance = function (id) {
       return instance;
     }.bind(this));
   }.bind(this));
-};
+});
 
 ProcessEngine.prototype.queryProcessInstances = function (conditions) {
   return this.instanceCollection.findAsync(conditions);
