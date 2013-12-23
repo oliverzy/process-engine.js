@@ -1,5 +1,5 @@
 var _ = require('lodash');
 _.extend(module.exports,
-  require('./process-definition.js'),
-  require('./process-engine.js'),
-  require('./human-task.js'));
+  require('./src/process-definition.js'),
+  require('./src/process-engine.js'),
+  require('./src/human-task.js'));

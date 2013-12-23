@@ -7,7 +7,7 @@ var Datastore = require('nedb');
 var Promise = require("bluebird");
 var joint = require('jointjs');
 var dagre = require('dagre');
-var layoutHelper = require('./lib/joint.layout.DirectedGraph.js');
+var layoutHelper = require('../lib/joint.layout.DirectedGraph.js');
 
 var definitionCollection = new Datastore();
 Promise.promisifyAll(definitionCollection);

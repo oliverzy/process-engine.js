@@ -4,7 +4,8 @@
   "description": "Javascript Process Engine inspired by jBPM5/Camunda BPM",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -R spec test",
+    "coverage": "istanbul cover _mocha test"
   },
   "author": "Oliver Zhou",
   "license": "BSD-2-Clause",
