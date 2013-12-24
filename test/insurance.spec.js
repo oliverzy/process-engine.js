@@ -1,11 +1,12 @@
 var Promise = require("bluebird");
 Promise.longStackTraces();
 var expect = require('chai').expect;
-var processEngine = require('../').processEngine;
-var ProcessDefinition = require('../').ProcessDefinition;
-var ProcessInstance = require('../').ProcessInstance;
-var processBuilder = require('../').processBuilder;
-var humanTaskService = require('../').humanTaskService;
+var ProcessEngine = require('../');
+var processEngine = ProcessEngine.processEngine,
+    ProcessDefinition = ProcessEngine.ProcessDefinition,
+    ProcessInstance = ProcessEngine.ProcessInstance,
+    processBuilder = ProcessEngine.processBuilder,
+    humanTaskService = ProcessEngine.humanTaskService;
 var _ = require('lodash');
 
 describe('Quick Quote Process', function() {
