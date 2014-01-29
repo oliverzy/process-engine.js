@@ -297,8 +297,21 @@ ProcessDefinition.load = function (id) {
   });
 };
 
-ProcessDefinition.query = function (conditions) {
-  return definitionCollection.findAsync(conditions);
+ProcessDefinition.query = function (conditions, options) {
+  if (!options)
+    return definitionCollection.findAsync(conditions);
+  else
+    return new Promise(function (resolve, reject) {
+      var cursor = definitionCollection.find(conditions);
+      if (options.sort)
+        cursor.sort(options.sort);
+      if (options.limit)
+        cursor.limit(options.limit);
+      cursor.exec(function (err, result) {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
 };
 
 /**
