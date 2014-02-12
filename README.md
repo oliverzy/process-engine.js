@@ -20,6 +20,7 @@ TBD
 
 ###Roadmap
 * BPMN 2.0 XML Import/Export
+* Remove JointJS dependency
 * BPMN Error Event
 * BPMN Message Event
 * BPMN Timer Event

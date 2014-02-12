@@ -353,11 +353,9 @@ ProcessDefinition.prototype.render = function () {
 };
 
 
-module.exports = {
-  ProcessDefinition: ProcessDefinition,
-  processBuilder: processBuilder,
-  Task: Task,
-  ServiceTask: ServiceTask,
-  Decision: Decision
-};
+ProcessDefinition.processBuilder = processBuilder;
+ProcessDefinition.Task = Task;
+ProcessDefinition.ServiceTask = ServiceTask;
+ProcessDefinition.Decision = Decision;
+module.exports = ProcessDefinition;
 

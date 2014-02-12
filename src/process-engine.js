@@ -7,11 +7,11 @@ var Datastore = require('nedb');
 var Promise = require("bluebird");
 var debug = require('debug')('process-engine');
 
-var ProcessDefinition = require('./process-definition.js').ProcessDefinition;
-var processBuilder = require('./process-definition.js').processBuilder;
-var Task = require('./process-definition.js').Task;
-var ServiceTask = require('./process-definition.js').ServiceTask;
-var Decision = require('./process-definition.js').Decision;
+var ProcessDefinition = require('./process-definition.js');
+var processBuilder = ProcessDefinition.processBuilder;
+var Task = ProcessDefinition.Task;
+var ServiceTask = ProcessDefinition.ServiceTask;
+var Decision = ProcessDefinition.Decision;
 
 /**
  * [CORE] The graph structure to hold the runtime process execution state
