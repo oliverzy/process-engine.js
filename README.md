@@ -4,7 +4,7 @@ a minimial library for workflow and process automation for Node. It's heavily in
 ###Best For
 * Task Orchestration
 * Human Task Management
-* Process Monitoring
+* Process Management and Monitoring via a Node.js web application
 
 ###Features
 * Start/End/Decision(Exclusive Gateway)/Parallel Gateway/Service/Human Task

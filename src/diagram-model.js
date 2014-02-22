@@ -34,19 +34,19 @@ function createActivity(task) {
 }
 
 function createDiagramModel(processDefinition) {
-  var diagram_model = {};
-  diagram_model.processDefinition = {
+  var diagramModel = {};
+  diagramModel.processDefinition = {
     id: processDefinition.name,
     isGraphicNotationDefined: true,
     //key: processDefinition.key,
   };
 
-  diagram_model.activities = _.map(processDefinition.tasks, function (task) {
+  diagramModel.activities = _.map(processDefinition.tasks, function (task) {
     return createActivity(task);
   });
 
   var flowId = 0;
-  diagram_model.sequenceFlows = _(processDefinition.tasks).map(function (task) {
+  diagramModel.sequenceFlows = _(processDefinition.tasks).map(function (task) {
     return _.map(task.outgoingFlows, function (flow) {
       flowId++;
       return {
@@ -61,24 +61,24 @@ function createDiagramModel(processDefinition) {
     });
   }).flatten().value();
 
-  return diagram_model;
+  return diagramModel;
 }
 
-function doLayout(diagram_model) {
+function doLayout(diagramModel) {
   var g = new dagre.Digraph();
-  _.each(diagram_model.activities, function (activity) {
+  _.each(diagramModel.activities, function (activity) {
     g.addNode(activity.activityId, {width: activity.width, height: activity.height});
   });
-  _.each(diagram_model.sequenceFlows, function (flow) {
+  _.each(diagramModel.sequenceFlows, function (flow) {
     g.addEdge(flow.id, flow.from, flow.to);
   });
 
   var layout = dagre.layout().nodeSep(20).rankDir("LR").run(g);
-  _.each(diagram_model.activities, function (activity) {
+  _.each(diagramModel.activities, function (activity) {
     activity.x = layout.node(activity.activityId).x - activity.width / 2;
     activity.y = layout.node(activity.activityId).y - activity.height / 2;
   });
-  _.each(diagram_model.sequenceFlows, function (flow) {
+  _.each(diagramModel.sequenceFlows, function (flow) {
     flow.xPointArray.push(layout.node(flow.from).x);
     flow.yPointArray.push(layout.node(flow.from).y);
     var points = layout.edge(flow.id).points;
@@ -97,9 +97,9 @@ function doLayout(diagram_model) {
 
 module.exports = {
   getDiagramModel: function (processDefinition) {
-    var diagram_model = createDiagramModel(processDefinition);
-    doLayout(diagram_model);
-    return diagram_model;
+    var diagramModel = createDiagramModel(processDefinition);
+    doLayout(diagramModel);
+    return diagramModel;
   }
 };
 
