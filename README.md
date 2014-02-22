@@ -11,6 +11,7 @@ a minimial library for workflow and process automation for Node. It's heavily in
 * Human Task Management
 * Process Definition Management and Visualization
 * Process Instance Management
+* Process Diagram Generator
 
 ###Get Started
 TBD
@@ -19,16 +20,18 @@ TBD
 TBD
 
 ###Roadmap
+* Make process builder uses Builder pattern (http://docs.camunda.org/latest/guides/user-guide/#bpmn-model-api)
+* Error Handling Solution (complete (err, cb))
+* Support NeDB disk persistence as well
+* Human Task Form (https://github.com/nimbly/angular-formly)
+* User Management Service
+* Histronic Process Instance
+* Sub Process
 * BPMN 2.0 XML Import/Export
-* Remove JointJS dependency
 * BPMN Error Event
 * BPMN Message Event
 * BPMN Timer Event
 * BPMN Compensation Event
-* Error Handling (complete (err, cb))
-* Human Task Form
-* User Management Service
-* Sub Process
 
 ###Reference
 BPMN 2.0 - http://www.camunda.org/bpmn/reference.html

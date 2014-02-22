@@ -1,7 +1,7 @@
 {
   "name": "process-engine",
   "version": "0.0.0",
-  "description": "Javascript Process Engine inspired by jBPM5/Camunda BPM",
+  "description": "Javascript Process Engine inspired by BPMN 2.0",
   "main": "index.js",
   "scripts": {
     "test": "mocha -R spec test",
@@ -14,7 +14,8 @@
     "nedb": "~0.10.0",
     "underscore.string": "~2.3.3",
     "debug": "~0.7.4",
-    "bluebird": "~1.0.0"
+    "bluebird": "~1.0.0",
+    "dagre": "~0.4.5"
   },
   "devDependencies": {
     "chai": "~1.8.1"

@@ -469,7 +469,7 @@ describe('human process with cycle', function() {
 describe('process definition query', function() {
   it('total', function (done) {
     ProcessDefinition.query({}).done(function (defs) {
-      expect(defs.length).to.be.equal(10);
+      expect(defs.length).to.be.equal(8);
       done();
     });
   });

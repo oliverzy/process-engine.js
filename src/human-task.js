@@ -9,7 +9,6 @@ var processEngine = ProcessEngine.processEngine,
 var Datastore = require('nedb');
 var Promise = require("bluebird");
 var debug = require('debug')('human-task');
-var joint = require('jointjs');
 
 /**
  * Human Task needs to be managed in a separate collection so that in any time
@@ -41,15 +40,6 @@ HumanTask.prototype.deserialize = function (entity) {
   this.assignee = entity.assignee;
   this.candidateUsers = entity.candidateUsers;
   this.candidateGroups = entity.candidateGroups;
-};
-
-HumanTask.prototype.render = function () {
-  var element = new joint.shapes.basic.Rect({
-      //position: { x: 180, y: 30 },
-      size: { width: 100, height: 30 },
-      attrs: { rect: { fill: 'grey' }, text: { text: this.name ? this.name : 'human', fill: 'white' } }
-    });
-  return element;
 };
 
 function HumanTaskNode() {

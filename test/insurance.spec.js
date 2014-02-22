@@ -102,9 +102,10 @@ describe('Quick Quote Process', function() {
     return processDefinition;
   }
 
+  var processDefinition = createProcessDefinition();
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processDefinition);
   });
 
   it('auto underwriting passed', function(done) {
@@ -181,6 +182,14 @@ describe('Quick Quote Process', function() {
     }, 400);
   });
 
+  it('diagram-model', function () {
+    var diagram_model = ProcessEngine.getDiagramModel(processDefinition);
+
+    //console.log(util.inspect(diagram_model, {depth: null}));
+    var fs = require('fs');
+    var d2 = fs.readFileSync('test/layouts/Quick Quote.json', {encoding: 'utf8'});
+    expect(JSON.stringify(diagram_model)).to.eql(d2);
+  });
 
 });
 

@@ -5,9 +5,6 @@ _.str = require('underscore.string');
 _.mixin(_.str.exports());
 var Datastore = require('nedb');
 var Promise = require("bluebird");
-var joint = require('jointjs');
-var dagre = require('dagre');
-var layoutHelper = require('../lib/joint.layout.DirectedGraph.js');
 
 var definitionCollection = new Datastore();
 Promise.promisifyAll(definitionCollection);
@@ -63,16 +60,6 @@ Task.deserialize = function (entity) {
   return task;
 };
 
-Task.prototype.render = function () {
-  var circle = new joint.shapes.basic.Circle({
-    //position: { x: 100, y: 30 },
-    size: { width: 30, height: 30 },
-    attrs: { circle: {fill: this.type == 'start-task' ? 'red' : 'green'} }
-  });
-
-  return circle;
-};
-
 /**
  * Exclusive Gateway
  */
@@ -82,71 +69,12 @@ function Decision() {
 }
 util.inherits(Decision, Task);
 
-var DecisionElement = joint.dia.Element.extend({
-
-  markup: '<g class="rotatable"><g class="scalable"><polygon class="outer"/><polygon class="inner"/></g><text/></g>',
-
-  defaults: joint.util.deepSupplement({
-
-    type: 'basic.Decision',
-    size: {
-      width: 80,
-      height: 80
-    },
-    attrs: {
-      '.outer': {
-        fill: '#3498DB',
-        stroke: '#2980B9',
-        'stroke-width': 2,
-        points: '40,0 80,40 40,80 0,40'
-      },
-      '.inner': {
-        fill: '#3498DB',
-        stroke: '#2980B9',
-        'stroke-width': 2,
-        points: '40,5 75,40 40,75 5,40',
-        display: 'none'
-      },
-      text: {
-        text: 'Decision',
-        'font-family': 'Arial',
-        'font-size': 12,
-        ref: '.',
-        'ref-x': 0.5,
-        'ref-y': 0.5,
-        'x-alignment': 'middle',
-        'y-alignment': 'middle'
-      }
-    }
-
-  }, joint.dia.Element.prototype.defaults)
-});
-
-Decision.prototype.render = function () {
-  var decision = new DecisionElement({
-    //position: { x: 320, y: 25},
-    size: {width: 70, height: 40},
-    attrs: {text: {text: this.name ? this.name : 'decision'}}
-  });
-
-  return decision;
-};
-
 function ServiceTask(action) {
   ServiceTask.super_.apply(this, arguments);
   this.type = 'service-task';
   this.action = action;
 }
 util.inherits(ServiceTask, Task);
-
-ServiceTask.prototype.render = function () {
-  var service = new joint.shapes.basic.Rect({
-      //position: { x: 180, y: 30 },
-      size: { width: 100, height: 30 },
-      attrs: { rect: { fill: 'blue' }, text: { text: this.name ? this.name : 'service', fill: 'white' } }
-    });
-  return service;
-};
 
 ServiceTask.prototype.serialize = function () {
   var entity = ServiceTask.super_.prototype.serialize.call(this);
@@ -224,17 +152,10 @@ ProcessDefinition.prototype.serialize = function () {
     tasks.push(task.serialize());
   }, this);
 
-  var layout;
-  if (this.layout)
-    layout = _.isString(this.layout) ? this.layout : JSON.stringify(this.layout.toJSON());
-  else
-    layout = JSON.stringify(this.render().toJSON());
-
   var entity = {
     _id: this._id,
     name: this.name,
     tasks: tasks,
-    layout: layout,
     variables: this.variables,
     category: this.category
   };
@@ -248,11 +169,6 @@ ProcessDefinition.deserialize = function (entity) {
   def.name = entity.name;
   def.variables = entity.variables;
   def.category = entity.category;
-  if (entity.layout) {
-    var graph = new joint.dia.Graph();
-    graph.fromJSON(JSON.parse(entity.layout));
-    def.layout = graph;
-  }
   entity.tasks.forEach(function (taskEntity) {
     def.addTask(Task.deserialize(taskEntity));
   });
@@ -312,44 +228,6 @@ ProcessDefinition.query = function (conditions, options) {
         resolve(result);
       });
     });
-};
-
-/**
- * Create JointJS Graph and then use Dagre to do automatic layout
- * @return {joint.dia.Graph}
- */
-ProcessDefinition.prototype.render = function () {
-  var graph = new joint.dia.Graph();
-
-  _.forOwn(this.tasks, function (task) {
-    var cell = task.render();
-    graph.addCell(cell);
-    task.cell = cell;
-  }, this);
-
-  _.forOwn(this.tasks, function (task) {
-    task.outgoingFlows.forEach(function (flow) {
-      var link = new joint.dia.Link({
-        source: { id: flow.from.cell.id },
-        target: { id: flow.to.cell.id },
-        manhattan: true,
-        toolMarkup: '<g></g>',
-        // labels: [
-        //   { position: 0.6, attrs: { text: { text: 'Yes', fill: 'brown', 'font-family': 'sans-serif' }}}
-        // ]
-        attrs: {
-          '.marker-target': {
-              d: 'M 10 0 L 0 5 L 10 10 z'
-            }
-          }
-        });
-      graph.addCell(link);
-    });
-  }, this);
-
-  layoutHelper.layout(graph, { setLinkVertices: false, rankDir: 'LR', rankSep: 50 });
-  //console.log(graph.toJSON());
-  return graph;
 };
 
 
