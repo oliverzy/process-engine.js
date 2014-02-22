@@ -1,0 +1,22 @@
+<legend>Process Instances</legend>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Status</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="instance in instances" ng-click="view(instance)" ng-class="{'table-row-selection': currentInstance === instance}">
+      <td>{{instance.id}}</td>
+      <td>{{instance.status}}</td>
+      <td>{{instance.def}}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div ng-if="currentInstance">
+  <legend>{{ currentInstance.def }} ({{currentInstance.id}})</legend>
+  <process-variables variables="currentInstance.variables"></process-variables>
+</div>

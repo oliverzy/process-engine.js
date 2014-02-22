@@ -1,0 +1,27 @@
+{
+  "name": "process-engine-ui",
+  "description": "NodeJS Process Engine Web Application",
+  "author": "Oliver Zhou",
+  "version": "0.0.0",
+  "repository": "",
+  "scripts": {
+    "start": "brunch watch --server"
+  },
+  "dependencies": {
+    "lodash": "~2.3.0",
+    "express": "~3.4.4",
+    "json-mask": "~0.2.0",
+    "express-partial-response": "~0.2.1",
+    "express-namespace": "~0.1.1",
+    "nedb": "~0.10.0",
+    "bluebird": "~1.0.0"
+  },
+  "devDependencies": {
+    "javascript-brunch": "~1.7.0",
+    "css-brunch": "~1.7.0",
+    "ngmin-uglify-js-brunch": "~1.7.2",
+    "clean-css-brunch": "~1.7.1",
+    "coffee-script-brunch": "~1.7.2",
+    "auto-reload-brunch": "~1.7.1"
+  }
+}

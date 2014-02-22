@@ -1,0 +1,34 @@
+<table class="table table-bordered table-hover table-condensed">
+  <tr style="font-weight: bold">
+    <td style="width:35%">Name</td>
+    <td style="width:65%">Value</td>
+  </tr>
+  <tr ng-repeat="variable in variables">
+    <td>
+      <span editable-text="variable.name" e-name="name" e-form="rowform" e-required>
+        {{ variable.name }}
+      </span>
+    </td>
+    <td>
+      <span editable-text="variable.value" e-name="status" e-form="rowform" e-required>
+        {{ variable.value }}
+      </span>
+    </td>
+    <td style="white-space: nowrap" ng-show="editible">
+      <!-- form -->
+      <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == variable">
+        <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
+          save
+        </button>
+        <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel(); cancelVariable($index)" class="btn btn-default">
+          cancel
+        </button>
+      </form>
+      <div class="buttons" ng-show="!rowform.$visible">
+        <button class="btn btn-primary" ng-click="rowform.$show()">edit</button>
+        <button class="btn btn-danger" ng-click="removeVariable($index)">del</button>
+      </div>  
+    </td>
+  </tr>
+</table>
+<button ng-show="editible" class="btn btn-default" ng-click="addVariable()">Add Variable</button>

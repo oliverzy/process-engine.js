@@ -1,0 +1,374 @@
+{
+    "activities": [
+        {
+            "activityId": "provideNewSalesLead",
+            "height": 80,
+            "properties": {
+                "name": "Provide new sales lead",
+                "type": "userTask"
+            },
+            "width": 100,
+            "x": 165,
+            "y": 275
+        },
+        {
+            "activityId": "reviewSalesLeadSubProcess",
+            "height": 320,
+            "nestedActivities": [
+                "fork",
+                "reviewCustomerRating",
+                "reviewProfitability",
+                "enoughInformationCheck",
+                "subProcessStart",
+                "subProcessEnd1",
+                "subProcessEnd2",
+                "notEnoughInformationEnd",
+                "catchNotEnoughInformationError"
+            ],
+            "properties": {
+                "errorEventDefinitions": [
+                    {
+                        "errorCode": "not_enough_info",
+                        "handlerActivityId": "catchNotEnoughInformationError"
+                    }
+                ],
+                "initial": "subProcessStart",
+                "name": "Review sales lead",
+                "triggeredByEvent": false,
+                "type": "subProcess"
+            },
+            "width": 544,
+            "x": 315,
+            "y": 160
+        },
+        {
+            "activityId": "fork",
+            "height": 40,
+            "properties": {
+                "type": "parallelGateway"
+            },
+            "width": 40,
+            "x": 435,
+            "y": 295
+        },
+        {
+            "activityId": "reviewCustomerRating",
+            "height": 80,
+            "properties": {
+                "name": "Review customer rating",
+                "type": "userTask"
+            },
+            "width": 100,
+            "x": 517,
+            "y": 210
+        },
+        {
+            "activityId": "reviewProfitability",
+            "height": 80,
+            "properties": {
+                "documentation": "${initiator} has published a new sales lead: ${customerName}. Details: ${details}",
+                "name": "Review profitability",
+                "type": "userTask"
+            },
+            "width": 100,
+            "x": 517,
+            "y": 360
+        },
+        {
+            "activityId": "enoughInformationCheck",
+            "height": 40,
+            "properties": {
+                "name": "Enough information?",
+                "type": "exclusiveGateway"
+            },
+            "width": 40,
+            "x": 664,
+            "y": 380
+        },
+        {
+            "activityId": "subProcessStart",
+            "height": 30,
+            "properties": {
+                "type": "startEvent"
+            },
+            "width": 30,
+            "x": 360,
+            "y": 300
+        },
+        {
+            "activityId": "subProcessEnd1",
+            "height": 28,
+            "properties": {
+                "type": "endEvent"
+            },
+            "width": 28,
+            "x": 670,
+            "y": 236
+        },
+        {
+            "activityId": "subProcessEnd2",
+            "height": 28,
+            "properties": {
+                "type": "endEvent"
+            },
+            "width": 28,
+            "x": 765,
+            "y": 386
+        },
+        {
+            "activityId": "notEnoughInformationEnd",
+            "height": 28,
+            "properties": {
+                "type": "errorEndEvent"
+            },
+            "width": 28,
+            "x": 765,
+            "y": 345
+        },
+        {
+            "activityId": "catchNotEnoughInformationError",
+            "height": 30,
+            "isInterrupting": true,
+            "properties": {
+                "type": "boundaryError"
+            },
+            "width": 30,
+            "x": 783,
+            "y": 465
+        },
+        {
+            "activityId": "provideAdditionalDetails",
+            "height": 80,
+            "properties": {
+                "documentation": "Provide additional details for ${customerName}.",
+                "name": "Provide additional details",
+                "type": "userTask"
+            },
+            "width": 100,
+            "x": 660,
+            "y": 525
+        },
+        {
+            "activityId": "storeLeadInCrmSystem",
+            "height": 80,
+            "properties": {
+                "name": "Store lead in CRM system",
+                "type": "manualTask"
+            },
+            "width": 100,
+            "x": 910,
+            "y": 275
+        },
+        {
+            "activityId": "theStart",
+            "height": 30,
+            "properties": {
+                "type": "startEvent"
+            },
+            "width": 30,
+            "x": 75,
+            "y": 300
+        },
+        {
+            "activityId": "processEnd",
+            "height": 28,
+            "properties": {
+                "type": "endEvent"
+            },
+            "width": 28,
+            "x": 1050,
+            "y": 301
+        }
+    ],
+    "processDefinition": {
+        "deploymentId": "23",
+        "id": "reviewSaledLead:1:38",
+        "isGraphicNotationDefined": true,
+        "key": "reviewSaledLead",
+        "name": "Review sales lead",
+        "version": 1
+    },
+    "sequenceFlows": [
+        {
+            "flow": "(provideNewSalesLead)--flow2-->(reviewSalesLeadSubProcess)",
+            "id": "flow2",
+            "name": null,
+            "xPointArray": [
+                265,
+                290,
+                315
+            ],
+            "yPointArray": [
+                315,
+                315,
+                316
+            ]
+        },
+        {
+            "flow": "(reviewSalesLeadSubProcess)--flow10-->(storeLeadInCrmSystem)",
+            "id": "flow10",
+            "name": null,
+            "xPointArray": [
+                859,
+                910
+            ],
+            "yPointArray": [
+                317,
+                315
+            ]
+        },
+        {
+            "flow": "(fork)--flow4-->(reviewProfitability)",
+            "id": "flow4",
+            "name": null,
+            "xPointArray": [
+                455,
+                455,
+                517
+            ],
+            "yPointArray": [
+                335,
+                400,
+                400
+            ]
+        },
+        {
+            "flow": "(fork)--flow5-->(reviewCustomerRating)",
+            "id": "flow5",
+            "name": null,
+            "xPointArray": [
+                455,
+                455,
+                517
+            ],
+            "yPointArray": [
+                295,
+                250,
+                250
+            ]
+        },
+        {
+            "flow": "(reviewCustomerRating)--flow6-->(subProcessEnd1)",
+            "id": "flow6",
+            "name": null,
+            "xPointArray": [
+                617,
+                670
+            ],
+            "yPointArray": [
+                250,
+                250
+            ]
+        },
+        {
+            "flow": "(reviewProfitability)--flow7-->(enoughInformationCheck)",
+            "id": "flow7",
+            "name": null,
+            "xPointArray": [
+                617,
+                664
+            ],
+            "yPointArray": [
+                400,
+                400
+            ]
+        },
+        {
+            "flow": "(enoughInformationCheck)--flow8-->(notEnoughInformationEnd)",
+            "id": "flow8",
+            "name": null,
+            "xPointArray": [
+                684,
+                684,
+                765
+            ],
+            "yPointArray": [
+                380,
+                359,
+                359
+            ]
+        },
+        {
+            "flow": "(enoughInformationCheck)--flow9-->(subProcessEnd2)",
+            "id": "flow9",
+            "name": null,
+            "xPointArray": [
+                704,
+                765
+            ],
+            "yPointArray": [
+                400,
+                400
+            ]
+        },
+        {
+            "flow": "(subProcessStart)--flow3-->(fork)",
+            "id": "flow3",
+            "name": null,
+            "xPointArray": [
+                390,
+                435
+            ],
+            "yPointArray": [
+                315,
+                315
+            ]
+        },
+        {
+            "flow": "(catchNotEnoughInformationError)--flow11-->(provideAdditionalDetails)",
+            "id": "flow11",
+            "name": null,
+            "xPointArray": [
+                798,
+                798,
+                760
+            ],
+            "yPointArray": [
+                495,
+                565,
+                565
+            ]
+        },
+        {
+            "flow": "(provideAdditionalDetails)--flow12-->(reviewSalesLeadSubProcess)",
+            "id": "flow12",
+            "name": null,
+            "xPointArray": [
+                660,
+                587,
+                587
+            ],
+            "yPointArray": [
+                565,
+                565,
+                480
+            ]
+        },
+        {
+            "flow": "(storeLeadInCrmSystem)--flow13-->(processEnd)",
+            "id": "flow13",
+            "name": null,
+            "xPointArray": [
+                1010,
+                1050
+            ],
+            "yPointArray": [
+                315,
+                315
+            ]
+        },
+        {
+            "flow": "(theStart)--flow1-->(provideNewSalesLead)",
+            "id": "flow1",
+            "name": null,
+            "xPointArray": [
+                105,
+                165
+            ],
+            "yPointArray": [
+                315,
+                315
+            ]
+        }
+    ]
+}

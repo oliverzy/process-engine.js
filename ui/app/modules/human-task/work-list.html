@@ -1,0 +1,45 @@
+<legend>Work List</legend>
+
+<div style="margin-top: 5px;" class="row">
+  <div class="col-md-2">
+    <ul class="nav nav-pills nav-stacked nav-side">
+      <li class="h5">Task Status</li>
+      <li ng-class="{'active': status === currentStatus}" ng-repeat="status in STATUS">
+        <a ng-click="changeStatus(status)">{{status}}</a>
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-10">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Assignee</th>
+          <th>Process</th>
+          <!-- <th>Created</th> -->
+          <th>Last Modified</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="task in worklist | orderBy:'-modifiedTime'" ng-click="view(task)" ng-class="{'table-row-selection': currentTask === task}">
+          <td>{{task.name}}</td>
+          <td>{{task.status}}</td>
+          <td>{{task.assignee}}</td>
+          <td>{{task.processName}} ({{task.processId}})</td>
+          <!-- <td>{{task.createdTime | date:'medium'}}</td> -->
+          <td>{{task.modifiedTime | date:'medium'}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div ng-if="currentTask">
+  <legend>{{ currentTask.name }}</legend>
+  <process-variables variables="currentTask.processVariables" result="result" editible="editible"></process-variables>
+  <button ng-show="currentTask.status === 'New'" class="btn btn-primary" ng-click="claim(currentTask)" class="btn btn-small" >Claim</button>
+  <button ng-show="currentTask.status === 'Reserved'" class="btn btn-primary" ng-click="startWorking(currentTask)" class="btn btn-small" >Start Working</button>
+  <button ng-show="currentTask.status === 'In Progress'" class="btn btn-primary" ng-click="complete(currentTask)" class="btn btn-small" >Complete</button>
+</div>
+

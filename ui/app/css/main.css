@@ -1,0 +1,99 @@
+.center {
+	text-align: center;
+}
+
+.popover-content {
+	padding: 9px 14px;
+	word-wrap: break-word;
+}
+
+.ng-table th {
+    text-align: left;
+}
+
+html,body{
+    height: 100%
+}
+
+.holder {
+    min-height: 100%;
+    position:relative;
+}
+
+.body {
+    padding-bottom: 30px;
+}
+
+.footer{
+    bottom: 0;
+    height: 30px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    font-size: 11px;
+    color: #999999;
+}
+
+.form-inline label {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.form-inline .control-group {
+    margin-bottom: 20px;
+}
+
+/**
+ * sign in form
+ */
+.form-signin {
+    max-width: 300px;
+    padding: 19px 29px 29px;
+    margin: 0 auto 20px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+
+.form-signin h2,
+.form-signin input[type="checkbox"] {
+    margin-bottom: 10px;
+}
+
+.form-signin input[type="text"],
+.form-signin input[type="password"] {
+    font-size: 16px;
+    height: auto;
+    margin-bottom: 15px;
+    padding: 7px 9px;
+}
+
+.table th,
+.table td {
+  padding: 8px;
+  line-height: 20px;
+  text-align: left;
+  vertical-align: middle;
+  border-top: 1px solid #dddddd;
+}
+
+.table-row-selection {
+  background: #f5f5f5;
+}
+
+.table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.nav-side > li > a {
+  padding: 5px 5px;
+}
+
+.nav, .pagination, .carousel a { cursor: pointer; }
+
+
