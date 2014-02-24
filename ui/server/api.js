@@ -1,7 +1,8 @@
 var _ = require('lodash');
-var humanTaskService = require('process-engine').humanTaskService;
-var ProcessDefinition = require('process-engine').ProcessDefinition;
-var processEngine = require('process-engine').processEngine;
+var ProcessEngine = require('process-engine');
+var humanTaskService = ProcessEngine.humanTaskService;
+var ProcessDefinition = ProcessEngine.ProcessDefinition;
+var processEngine = ProcessEngine.processEngine;
 
 exports.addRoutes = function (app) {
   // JSON API
@@ -11,6 +12,7 @@ exports.addRoutes = function (app) {
     });
   });
 
+  // TEST
   app.get('/diagram-viewer/service/process-definition/:id/diagram-layout', function (req, res) {
     console.log(req.params.id);
     res.sendfile('sample-test-diagram.json');
@@ -51,11 +53,14 @@ exports.addRoutes = function (app) {
     });
   });
 
-  app.post('/api/process-definitions', function (req, res) {
-    var def = ProcessDefinition.deserialize(req.body);
-    def.save().done(function () {
+  app.get('/api/process-definitions/:id/diagram', function (req, res) {
+    if (req.params.id)
+      ProcessDefinition.load(req.params.id).done(function (def) {
+        var diagram_model = ProcessEngine.getDiagramModel(def);
+        return res.json(diagram_model);
+      });
+    else
       res.status(200).send();
-    });
   });
 
   app.post('/api/process-definitions/:id/start', function (req, res) {

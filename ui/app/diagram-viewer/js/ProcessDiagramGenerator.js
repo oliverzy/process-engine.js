@@ -5,7 +5,7 @@
  * @author (Javascript) Dmitry Farafonov
  */
  
-var ProcessDiagramGenerator = {	
+var ProcessDiagramGenerator = {
 	options: {},
 	
 	processDiagramCanvas: [],
@@ -475,6 +475,7 @@ var ProcessDiagramGenerator = {
 		    return (!Object.isSVGElement(window.event.srcElement));
 		  };
 		});
+
 	},
 	
 	 getActivitiLabel:function(activityImpl){
@@ -509,11 +510,11 @@ var ProcessDiagramGenerator = {
 		var processDefinitionId = processDefinitionDiagramLayout.processDefinition.id;
 		//console.log("Init canvas ", processDefinitionId);
 		
-		if (this.getProcessDiagram(processDefinitionId) != undefined) {
-			// TODO: may be reset canvas if exists.. Or just show
-			//console.log("ProcessDiagram '" + processDefinitionId + "' is already generated. Just show it.");
-			return;
-		}
+		// if (this.getProcessDiagram(processDefinitionId) != undefined) {
+		// 	// TODO: may be reset canvas if exists.. Or just show
+		// 	//console.log("ProcessDiagram '" + processDefinitionId + "' is already generated. Just show it.");
+		// 	return;
+		// }
 		var processDiagram = this.initProcessDiagramCanvas(processDefinitionDiagramLayout);
 		var processDiagramCanvas = processDiagram.diagramCanvas;
 		
@@ -529,8 +530,7 @@ var ProcessDiagramGenerator = {
 		var activities = processDefinitionDiagramLayout.activities;
 		var sequenceFlows = processDefinitionDiagramLayout.sequenceFlows;
 		
-		
-		pb1.set('value', 0);
+		ProcessDiagramGenerator.options.pb1.set('value', 0);
 		var cnt = 0;
 		if (laneSets) 
 			for(var i in laneSets) {
@@ -559,7 +559,7 @@ var ProcessDiagramGenerator = {
 				
 				task1.add(laneSet.lanes,function (task1, lane) {
 					progress += step;
-					pb1.set('value', parseInt(progress));
+					ProcessDiagramGenerator.options.pb1.set('value', parseInt(progress));
 					
 					//console.log("--> laneId: " + lane.name + ", name: " + lane.name);
 					
@@ -579,7 +579,7 @@ var ProcessDiagramGenerator = {
 				var activity = new ActivityImpl(activityJson);
 				activitiesLength --;
 				progress += step;
-				pb1.set('value', parseInt(progress));
+				ProcessDiagramGenerator.options.pb1.set('value', parseInt(progress));
 				//console.log(activitiesLength, "--> activityId: " + activity.getId() + ", name: " + activity.getProperty("name"));
 				ProcessDiagramGenerator.drawActivity(processDiagramCanvas, activity);
 			});
@@ -615,7 +615,7 @@ var ProcessDiagramGenerator = {
 				//
 				flowsLength--;
 				progress += step;
-				pb1.set('value', parseInt(progress));
+				ProcessDiagramGenerator.options.pb1.set('value', parseInt(progress));
 				
 				//console.log(flowsLength, "--> flow: " + flow.flow);
 				
@@ -625,7 +625,7 @@ var ProcessDiagramGenerator = {
 			
 			task1.onComplete(function(){
 				if (progress<100)
-					pb1.set('value', 100);
+					ProcessDiagramGenerator.options.pb1.set('value', 100);
 				//console.log("COMPLETE!!!");
 					
 				//console.timeEnd('generateDiagram');
@@ -837,16 +837,15 @@ var ProcessDiagramGenerator = {
 	drawDiagram: function(processDefinitionId) {
 		// Hide all diagrams
 		var diagrams = $("#" + this.options.diagramHolderId + " div.diagram");
-		diagrams.addClass("hidden");
-	
+		//diagrams.addClass("hidden");
 	
 		// If processDefinitionId doesn't contain ":" then it's a "processDefinitionKey", not an id.
 		// Get process definition by key
-		if (processDefinitionId.indexOf(":") < 0) {
-			ActivitiRest.getProcessDefinitionByKey(processDefinitionId, this._drawDiagram);
-		} else {
+		//if (processDefinitionId.indexOf(":") < 0) {
+		//	ActivitiRest.getProcessDefinitionByKey(processDefinitionId, this._drawDiagram);
+		//} else {
 			this._drawDiagram.apply({processDefinitionId: processDefinitionId});
-		}
+		//}
 	},
 	_drawDiagram: function() {
 		var processDefinitionId = this.processDefinitionId;
@@ -857,21 +856,21 @@ var ProcessDiagramGenerator = {
 		// Check if processDefinition is already loaded and rendered
 		
 		
-		var processDiagram = ProcessDiagramGenerator.getProcessDiagram(processDefinitionId);
+		// var processDiagram = ProcessDiagramGenerator.getProcessDiagram(processDefinitionId);
 
-		if (processDiagram != undefined && processDiagram != null) {
-			//console.log("Process diagram " + processDefinitionId + " is already loaded");
-			//return;
+		// if (processDiagram != undefined && processDiagram != null) {
+		// 	//console.log("Process diagram " + processDefinitionId + " is already loaded");
+		// 	//return;
 			
-			var diagram = document.getElementById(processDefinitionId);
-			$(diagram).removeClass("hidden");
+		// 	var diagram = document.getElementById(processDefinitionId);
+		// 	$(diagram).removeClass("hidden");
 			
-			// Regenerate image
-			var processDefinitionDiagramLayout = processDiagram.processDefinitionDiagramLayout;
-			ProcessDiagramGenerator.generateDiagram(processDefinitionDiagramLayout);
+		// 	// Regenerate image
+		// 	var processDefinitionDiagramLayout = processDiagram.processDefinitionDiagramLayout;
+		// 	ProcessDiagramGenerator.generateDiagram(processDefinitionDiagramLayout);
 			
-			return;
-		}
+		// 	return;
+		// }
 
 		//console.time('loadDiagram');
 		
@@ -886,8 +885,7 @@ var ProcessDiagramGenerator = {
 		
 		//console.timeEnd('loadDiagram');
 		//console.time('generateDiagram');
-		
-		pb1.set('value', 0);
+		ProcessDiagramGenerator.options.pb1.set('value', 0);
 		ProcessDiagramGenerator.generateDiagram(processDefinitionDiagramLayout);
 	},
 	
@@ -1004,11 +1002,8 @@ var ProcessDiagramGenerator = {
 		var processDefinitionDiagramLayout = processDiagram.processDefinitionDiagramLayout;
 		ProcessDiagramGenerator.generateDiagram(processDefinitionDiagramLayout);
 	},
-	
-	showFlowInfo: function(flow){
-		var diagramInfo = $("#" + this.options.diagramInfoId);
-		if (!diagramInfo) return;
-		
+
+	getFlowInfo: function(flow) {
 		var values = {
 			flow: flow.flow,
 			isDefault: (flow.isDefault)? "true":"",
@@ -1024,14 +1019,19 @@ var ProcessDiagramGenerator = {
 				+ '<div><b>isConditional</b>: {isConditional}</div>'
 				+ '<div><b>isHighLighted</b>: {isHighLighted}</div>';
 		var tpl = Lang.sub(TPL_FLOW_INFO, values);
-		//console.log("info: ", tpl);
-		diagramInfo.html(tpl);
+		return tpl;
 	},
 	
-	showActivityInfo: function(activity){
+	showFlowInfo: function(flow){
 		var diagramInfo = $("#" + this.options.diagramInfoId);
 		if (!diagramInfo) return;
 		
+		var tpl = getFlowInfo(flow);
+		//console.log("info: ", tpl);
+		diagramInfo.html(tpl);
+	},
+
+	getActivityInfo: function(activity) {
 		var values = {
 			activityId: activity.getId(),
 			name: activity.getProperty("name"),
@@ -1055,6 +1055,14 @@ var ProcessDiagramGenerator = {
 		}
 				
 		var tpl = Lang.sub(template, values);
+		return tpl;
+	},
+	
+	showActivityInfo: function(activity){
+		var diagramInfo = $("#" + this.options.diagramInfoId);
+		if (!diagramInfo) return;
+				
+		var tpl = getActivityInfo(activity);
 		//console.log("info: ", tpl);
 		diagramInfo.html(tpl);
 	},

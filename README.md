@@ -28,10 +28,6 @@ TBD
 * Histronic Process Instance
 * Sub Process
 * BPMN 2.0 XML Import/Export
-* BPMN Error Event
-* BPMN Message Event
-* BPMN Timer Event
-* BPMN Compensation Event
 
 ###Reference
 BPMN 2.0 - http://www.camunda.org/bpmn/reference.html

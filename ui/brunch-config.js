@@ -41,11 +41,9 @@ exports.config = {
         before: [
           'vendor/jquery.js',
           'vendor/lodash.js',
-          'vendor/joint/backbone.js',
-          'vendor/joint/joint.nojquerynobackbone.js',
-          'vendor/joint/joint.layout.DirectedGraph.js',
           'bower_components/angular/angular.js',
           'vendor/angular-nvd3/d3.js',
+          'vendor/qtip/jquery.qtip.js',
 
           // diagram viewer
           'app/diagram-viewer/js/jstools.js',

@@ -1,3 +1,12 @@
+<script type="text/ng-template" id="diagram.html">
+  <div class="wrapper">
+    <div id="overlayBox" >
+      <div class="diagram-info" id="diagramInfo"></div>
+      <div id="diagramHolder" class="diagramHolder"></div>
+    </div>
+  </div>
+</script>
+
 <legend>Process Definitions</legend>
 <table ng-table="tableParams" class="table table-hover table-condensed">
   <tbody ng-repeat="group in $groups">
@@ -22,8 +31,7 @@
   <legend>{{ currentDef.name }}</legend>
   <process-variables variables="currentDef.variables" result="result" editible="true"></process-variables>
   <button class="btn btn-primary" ng-click="start(currentDef)"><i class="fa fa-play"></i> Start</button>
-  <div style="overflow: scroll; width: 100%; height: 400px;">
-    <process-def def="currentDef" width="1500" height="300"></process-def>
+  <div style="overflow: scroll; width: 100%; height: 300px;">
+    <process-def def="currentDef"></process-def>
   </div>
 </div>
-

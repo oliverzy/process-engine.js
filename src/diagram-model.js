@@ -36,7 +36,7 @@ function createActivity(task) {
 function createDiagramModel(processDefinition) {
   var diagramModel = {};
   diagramModel.processDefinition = {
-    id: processDefinition.name,
+    id: processDefinition._id || processDefinition.name,
     isGraphicNotationDefined: true,
     //key: processDefinition.key,
   };

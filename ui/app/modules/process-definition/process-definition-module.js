@@ -7,46 +7,6 @@ module.config(function($routeProvider) {
   });
 });
 
-joint.shapes.basic.Decision = joint.dia.Element.extend({
-
-  markup: '<g class="rotatable"><g class="scalable"><polygon class="outer"/><polygon class="inner"/></g><text/></g>',
-
-  defaults: joint.util.deepSupplement({
-
-    type: 'Decision',
-    size: {
-      width: 80,
-      height: 80
-    },
-    attrs: {
-      '.outer': {
-        fill: '#3498DB',
-        stroke: '#2980B9',
-        'stroke-width': 2,
-        points: '40,0 80,40 40,80 0,40'
-      },
-      '.inner': {
-        fill: '#3498DB',
-        stroke: '#2980B9',
-        'stroke-width': 2,
-        points: '40,5 75,40 40,75 5,40',
-        display: 'none'
-      },
-      text: {
-        text: 'Decision',
-        'font-family': 'Arial',
-        'font-size': 12,
-        ref: '.',
-        'ref-x': 0.5,
-        'ref-y': 0.5,
-        'x-alignment': 'middle',
-        'y-alignment': 'middle'
-      }
-    }
-
-  }, joint.dia.Element.prototype.defaults)
-});
-
 module.directive('processDef', function ($compile, $http){
   return {
     restrict: 'E',
@@ -55,45 +15,66 @@ module.directive('processDef', function ($compile, $http){
       width: '@',
       height: '@'
     },
-    compile: function(tElement, tAttrs, transclude) {
-      return function($scope, iElm, iAttrs, scrollableCtrl) {
-        function createGraph(def) {
-          iElm.empty();
-          iElm.append('<button ng-show="def" ng-click="saveLayout()" class="btn btn-default pull-right"><i class="fa fa-white fa-save"></i> Save</button>');
-          $compile(iElm)($scope);
-          var graph;
-          if (def.layout instanceof joint.dia.Graph) {
-            graph = def.layout;
-          } else {
-            graph = new joint.dia.Graph();
-            graph.fromJSON(_.extend({}, JSON.parse(def.layout)));
-          }
-          var paper = new joint.dia.Paper({
-            el: iElm,
-            width: $scope.width ? $scope.width : 800,
-            height: $scope.height ? $scope.height : 100,
-            gridSize: 5,
-            model: graph
-          });
-          paper.resetCells(graph.get('cells'));
-
-          $scope.saveLayout = function () {
-            def.layout = JSON.stringify(graph.toJSON());
-            console.log(def.layout);
-            $http.post('api/process-definitions', def).success(function () {
-              toastr.success('Update Successfully', null, {
-                positionClass: 'toast-bottom-right'
+    templateUrl: 'diagram.html',
+    link: function ($scope, iElm, iAttrs) {
+      function createDiagram() {
+        $('#diagramHolder').empty();
+        var DiagramGenerator = {};
+        var processDefinitionId = $scope.def._id;
+        var processInstanceId = null;
+        
+        ProcessDiagramGenerator.options = {
+          diagramBreadCrumbsId: null,
+          diagramHolderId: "diagramHolder",
+          diagramInfoId: null,
+          pb1: {
+            set: function () {}
+          },
+          on: {
+            click: function(canvas, element, contextObject){
+            },
+            rightClick: function(canvas, element, contextObject){
+            },
+            over: function(canvas, element, contextObject){
+              var mouseEvent = this;
+              console.log(canvas);
+              $(element.node).qtip({ // Grab some elements to apply the tooltip to
+                content: {
+                  text: ProcessDiagramGenerator.getActivityInfo(contextObject)
+                },
+                show: {
+                  ready: true // Show the tooltip as soon as it's bound, vital so it shows up the first time you hover!
+                }
               });
-            });
-          };
+            },
+            out: function(canvas, element, contextObject){
+            }
+          }
+        };
+        
+        var baseUrl = window.document.location.protocol + "//" + window.document.location.host + "/";
+        //var shortenedUrl = window.document.location.href.replace(baseUrl, "");
+        //baseUrl = baseUrl + shortenedUrl.substring(0, shortenedUrl.indexOf("/"));
+        baseUrl += 'api';
+        ActivitiRest.options = {
+          processInstanceHighLightsUrl: baseUrl + "/process-instances/{processInstanceId}/highlights",
+          processDefinitionUrl: baseUrl + "/process-definitions/{processDefinitionId}/diagram",
+          processDefinitionByKeyUrl: baseUrl + "/process-definitions/{processDefinitionKey}/diagram"
+        };
+        
+        if (processDefinitionId) {
+          ProcessDiagramGenerator.drawDiagram(processDefinitionId);
+        } else {
+          alert("processDefinitionId parameter is required");
         }
+      }
 
-        $scope.$watch('def', function(newValue, oldValue) {
-          if (newValue)
-            createGraph(newValue);
-        });
-      };
+      $scope.$watch('def', function(newValue, oldValue) {
+        if (newValue)
+          createDiagram(newValue);
+      });
     }
+
   };
 });
 

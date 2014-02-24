@@ -209,6 +209,7 @@ ProcessDefinition.prototype.save = function () {
 
 ProcessDefinition.load = function (id) {
   return definitionCollection.findOneAsync({'_id': id}).then(function (entity) {
+    //console.log(entity);
     return ProcessDefinition.deserialize(entity);
   });
 };

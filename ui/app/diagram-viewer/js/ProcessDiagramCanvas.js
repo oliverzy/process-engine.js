@@ -122,7 +122,7 @@ var ProcessDiagramCanvas = function(){
 ProcessDiagramCanvas.prototype = {
 // var ProcessDiagramCanvas = {
 	canvasHolder: "holder",
-	canvasWidth: 0, 
+	canvasWidth: 0,
 	canvasHeight: 0,
 	paint: Color.black,
 	strokeWidth: 0,
@@ -159,8 +159,8 @@ ProcessDiagramCanvas.prototype = {
 		var h = document.getElementById(this.canvasHolder);
 		if (!h) return;
 		
-		h.style.width = this.canvasWidth;
-		h.style.height = this.canvasHeight;
+		h.style.width = this.canvasWidth + 'px';
+		h.style.height = this.canvasHeight + 'px';
 		
 		this.g = Raphael(this.canvasHolder);
 		this.g.clear();
@@ -232,91 +232,91 @@ ProcessDiagramCanvas.prototype = {
 		object.data("contextObject", contextObject);
 	},
 	onClick: function(event, instance, element){
-	  var overlay = element;
-	  var set = overlay.data("set");
-	  var contextObject = overlay.data("contextObject");
-	  //console.log("["+contextObject.getProperty("type")+"], activityId: " + contextObject.getId());
-	  if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.click) {
-	    var args = [instance, element, contextObject];
-	    ProcessDiagramGenerator.options.on.click.apply(event, args);
-	  }
+		var overlay = element;
+		var set = overlay.data("set");
+		var contextObject = overlay.data("contextObject");
+		//console.log("["+contextObject.getProperty("type")+"], activityId: " + contextObject.getId());
+		if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.click) {
+			var args = [instance, element, contextObject];
+			ProcessDiagramGenerator.options.on.click.apply(event, args);
+		}
 	},
 	onRightClick: function(event, instance, element){
-	  var overlay = element;
-	  var set = overlay.data("set");
-	  var contextObject = overlay.data("contextObject");
-	  //console.log("[%s], activityId: %s (RIGHTCLICK)", contextObject.getProperty("type"), contextObject.getId());
+		var overlay = element;
+		var set = overlay.data("set");
+		var contextObject = overlay.data("contextObject");
+		//console.log("[%s], activityId: %s (RIGHTCLICK)", contextObject.getProperty("type"), contextObject.getId());
 
-	  if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.rightClick) {
-	    var args = [instance, element, contextObject];
-	    ProcessDiagramGenerator.options.on.rightClick.apply(event, args);
-	  }
+		if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.rightClick) {
+			var args = [instance, element, contextObject];
+			ProcessDiagramGenerator.options.on.rightClick.apply(event, args);
+		}
 	},
 	onHoverIn: function(event, instance, element){
-	  var overlay = element;
-	  var set = overlay.data("set");
-	  var contextObject = overlay.data("contextObject");
+		var overlay = element;
+		var set = overlay.data("set");
+		var contextObject = overlay.data("contextObject");
 
-	  var border = instance.g.getById(contextObject.id + "_border");
-	  border.attr("opacity", 0.3);
+		var border = instance.g.getById(contextObject.id + "_border");
+		border.attr("opacity", 0.3);
 
-	  // provide callback
-	  if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.over) {
-	    var args = [instance, element, contextObject];
-	    ProcessDiagramGenerator.options.on.over.apply(event, args);
-	  }
+		// provide callback
+		if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.over) {
+			var args = [instance, element, contextObject];
+			ProcessDiagramGenerator.options.on.over.apply(event, args);
+		}
 	 },
 	 onHoverOut: function(event, instance, element){
-	   var overlay = element;
-	   var set = overlay.data("set");
-	   var contextObject = overlay.data("contextObject");
+		 var overlay = element;
+		 var set = overlay.data("set");
+		 var contextObject = overlay.data("contextObject");
 
-	   var border = instance.g.getById(contextObject.id + "_border");
-	   border.attr("opacity", 0.0);
-	   // provide callback
-	   if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.out) {
-	     var args = [instance, element, contextObject];
-	     ProcessDiagramGenerator.options.on.out.apply(event, args);
-	   }
+		 var border = instance.g.getById(contextObject.id + "_border");
+		 border.attr("opacity", 0.0);
+		 // provide callback
+		 if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.out) {
+			 var args = [instance, element, contextObject];
+			 ProcessDiagramGenerator.options.on.out.apply(event, args);
+		 }
 	 },
 	 addHandlers: function(set, x, y, width, height, type){
-	   var contextObject = this.getConextObject();
+		 var contextObject = this.getConextObject();
 
-	   var cx = x+width/2, cy = y+height/2;
-	   if (type == "event") {
-	     var border = this.g.ellipse(cx, cy, width/2+4, height/2+4);
-	     var overlay = this.g.ellipse(cx, cy, width/2, height/2);
-	   } else if (type == "gateway") {
-	     // rhombus
-	     var border = this.g.path( "M" + (x - 4) + " " + (y + (height / 2)) +
-	         "L" + (x + (width / 2)) + " " + (y + height + 4) +
-	         "L" + (x + width + 4) + " " + (y + (height / 2)) +
-	         "L" + (x + (width / 2)) + " " + (y - 4) +
-	         "z" );
-	     var overlay = this.g.path(  "M" + x + " " + (y + (height / 2)) +
-	         "L" + (x + (width / 2)) + " " + (y + height) +
-	         "L" + (x + width) + " " + (y + (height / 2)) +
-	         "L" + (x + (width / 2)) + " " + y +
-	         "z" );
-	   } else if (type == "task") {
-	     var border = this.g.rect(x - 4, y - 4, width+9, height+9, TASK_CORNER_ROUND+4);
-	     var overlay = this.g.rect(x, y, width, height, TASK_CORNER_ROUND);
-	   }
+		 var cx = x+width/2, cy = y+height/2;
+		 if (type == "event") {
+			 var border = this.g.ellipse(cx, cy, width/2+4, height/2+4);
+			 var overlay = this.g.ellipse(cx, cy, width/2, height/2);
+		 } else if (type == "gateway") {
+			 // rhombus
+			 var border = this.g.path( "M" + (x - 4) + " " + (y + (height / 2)) +
+					 "L" + (x + (width / 2)) + " " + (y + height + 4) +
+					 "L" + (x + width + 4) + " " + (y + (height / 2)) +
+					 "L" + (x + (width / 2)) + " " + (y - 4) +
+					 "z" );
+			 var overlay = this.g.path(  "M" + x + " " + (y + (height / 2)) +
+					 "L" + (x + (width / 2)) + " " + (y + height) +
+					 "L" + (x + width) + " " + (y + (height / 2)) +
+					 "L" + (x + (width / 2)) + " " + y +
+					 "z" );
+		 } else if (type == "task") {
+			 var border = this.g.rect(x - 4, y - 4, width+9, height+9, TASK_CORNER_ROUND+4);
+			 var overlay = this.g.rect(x, y, width, height, TASK_CORNER_ROUND);
+		 }
 
-	   border.attr({stroke: Color.get(132,112,255)/*Color.Tan1*/,"stroke-width": 4, opacity: 0.0});
-	   border.id = contextObject.id + "_border";
+		 border.attr({stroke: Color.get(132,112,255)/*Color.Tan1*/,"stroke-width": 4, opacity: 0.0});
+		 border.id = contextObject.id + "_border";
 
-	   set.push(border);
+		 set.push(border);
 
-	   overlay.attr({stroke: Color.Orange,"stroke-width": 3, fill: Color.get(0,0,0), opacity: 0.0, cursor: "hand"});
-	   overlay.data("set",set);
-	   overlay.id = contextObject.id;
-	   overlay.data("contextObject",contextObject);
+		 overlay.attr({stroke: Color.Orange,"stroke-width": 3, fill: Color.get(0,0,0), opacity: 0.0, cursor: "hand"});
+		 overlay.data("set",set);
+		 overlay.id = contextObject.id;
+		 overlay.data("contextObject",contextObject);
 
-	   var instance = this;
-	   overlay.mousedown(function(event){if (event.button == 2) instance.onRightClick(event, instance, this);});
-	   overlay.click(function(event){instance.onClick(event, instance, this);});
-	   overlay.hover(function(event){instance.onHoverIn(event, instance, this);}, function(event){instance.onHoverOut(event, instance, this);});
+		 var instance = this;
+		 overlay.mousedown(function(event){if (event.button == 2) instance.onRightClick(event, instance, this);});
+		 overlay.click(function(event){instance.onClick(event, instance, this);});
+		 overlay.hover(function(event){instance.onHoverIn(event, instance, this);}, function(event){instance.onHoverOut(event, instance, this);});
 	 },
 	
 	/*
@@ -332,8 +332,8 @@ ProcessDiagramCanvas.prototype = {
 	 */
 	 
 	drawNoneStartEvent: function(x, y, width, height) {
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		var isInterrupting = undefined;
 		this._drawStartEvent(x, y, width, height, isInterrupting, null);
 		
@@ -342,8 +342,8 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawTimerStartEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		this._drawStartEvent(x, y, width, height, isInterrupting, null);
 		
 		var cx = x + width/2 - this.getStroke()/4;
@@ -362,41 +362,41 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawMessageStartEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		this._drawStartEvent(x, y, width, height, isInterrupting, null);
 		
 		this._drawStartEventImage(x, y, width, height, MESSAGE_CATCH_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawErrorStartEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		var isInterrupting = undefined;
 		this._drawStartEvent(x, y, width, height, isInterrupting);
 
 		this._drawStartEventImage(x, y, width, height, ERROR_CATCH_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawSignalStartEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawStartEvent(x, y, width, height, isInterrupting, null);
 		
 		this._drawStartEventImage(x, y, width, height, SIGNAL_CATCH_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawMultipleStartEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		
-	  this._drawStartEvent(x, y, width, height, isInterrupting, null);
+		this._drawStartEvent(x, y, width, height, isInterrupting, null);
 		
 		var cx = x + width/2 - this.getStroke()/4;
 		var cy = y + height/2 - this.getStroke()/4;
@@ -407,7 +407,7 @@ ProcessDiagramCanvas.prototype = {
 		this._drawPentagon(cx, cy, w, h);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	_drawStartEventImage: function(x, y, width, height, image){
@@ -463,49 +463,49 @@ ProcessDiagramCanvas.prototype = {
 	 */
 	 
 	drawNoneEndEvent: function(x, y, width, height) {
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		this._drawNoneEndEvent(x, y, width, height, null, "noneEndEvent");
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawErrorEndEvent: function(x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		var type = "errorEndEvent";
 		this._drawNoneEndEvent(x, y, width, height, null, type);
 		
 		this._drawEndEventImage(x, y, width, height, ERROR_THROW_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawMessageEndEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		var type = "errorEndEvent";
 		this._drawNoneEndEvent(x, y, width, height, null, type);
 		
 		this._drawEndEventImage(x, y, width, height, MESSAGE_THROW_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawSignalEndEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		var type = "errorEndEvent";
 		this._drawNoneEndEvent(x, y, width, height, null, type);
 		
 		this._drawEndEventImage(x, y, width, height, SIGNAL_THROW_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawMultipleEndEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		var type = "errorEndEvent";
 		this._drawNoneEndEvent(x, y, width, height, null, type);
 		
@@ -519,11 +519,11 @@ ProcessDiagramCanvas.prototype = {
 		this._drawPentagon(cx, cy, w, h, filled);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawTerminateEndEvent: function(x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		var type = "errorEndEvent";
 		this._drawNoneEndEvent(x, y, width, height, null, type);
 		
@@ -536,7 +536,7 @@ ProcessDiagramCanvas.prototype = {
 		var circle = this.g.ellipse(cx, cy, w, h).attr({fill: Color.black});
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	_drawEndEventImage: function(x, y, width, height, image){
@@ -612,7 +612,7 @@ ProcessDiagramCanvas.prototype = {
 	 
 	
 	drawCatchingTimerEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, isInterrupting, null);
 		
 		var innerCircleWidth = width - 4;
@@ -631,37 +631,37 @@ ProcessDiagramCanvas.prototype = {
 	},
 
 	drawCatchingErrorEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, isInterrupting, null);
 		
 		this._drawCatchingEventImage(x, y, width, height, ERROR_CATCH_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawCatchingSignalEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, isInterrupting, null);
 		
 		this._drawCatchingEventImage(x, y, width, height, SIGNAL_CATCH_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawCatchingMessageEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, isInterrupting, null);
 		
 		this._drawCatchingEventImage(x, y, width, height, MESSAGE_CATCH_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawCatchingMultipleEvent: function(x, y, width, height, isInterrupting, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, isInterrupting, null);
 		
 		var cx = x + width/2 - this.getStroke();
@@ -673,7 +673,7 @@ ProcessDiagramCanvas.prototype = {
 		this._drawPentagon(cx, cy, w, h);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	_drawCatchingEventImage: function(x, y, width, height, image){
@@ -758,35 +758,35 @@ ProcessDiagramCanvas.prototype = {
 	 */
 	
 	drawThrowingNoneEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, null, null);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawThrowingSignalEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, null, null);
 		
 		this._drawCatchingEventImage(x, y, width, height, SIGNAL_THROW_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawThrowingMessageEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, null, null);
 		
 		this._drawCatchingEventImage(x, y, width, height, MESSAGE_THROW_IMAGE);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	drawThrowingMultipleEvent: function(x, y, width, height, name) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCatchingEvent(x, y, width, height, null, null);
 		
 		var cx = x + width/2 - this.getStroke();
@@ -799,7 +799,7 @@ ProcessDiagramCanvas.prototype = {
 		this._drawPentagon(cx, cy, w, h, filled);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "event");
+		this.addHandlers(set, x, y, width, height, "event");
 	},
 	
 	/*
@@ -999,8 +999,22 @@ ProcessDiagramCanvas.prototype = {
 			var objectId = instance.data("objectId");
 			var object = this.paper.getById(objectId);
 			var contextObject = object.data("contextObject");
-			if (contextObject)
-				ProcessDiagramGenerator.showFlowInfo(contextObject);
+			if (contextObject) {
+				$(object.node).qtip({ // Grab some elements to apply the tooltip to
+					content: {
+						text: ProcessDiagramGenerator.getFlowInfo(contextObject)
+					},
+					show: {
+						ready: true // Show the tooltip as soon as it's bound, vital so it shows up the first time you hover!
+					}
+				});
+				//ProcessDiagramGenerator.showFlowInfo(contextObject);
+			}
+		}, function () {
+			var instance = this;
+			var objectId = instance.data("objectId");
+			var object = this.paper.getById(objectId);
+			$(object.node).qtip('destroy', true);
 		});
 		polyClone.data("parentId", uuid);
 		
@@ -1061,7 +1075,7 @@ ProcessDiagramCanvas.prototype = {
 		var conditional=isDefault=false;
 		this._drawFlow(waypoints, conditional, isDefault, highLighted, withArrowHead, CONNECTION_TYPE.ASSOCIATION);
 	},
-  
+	
 	_drawCircleTail: function(line, connectionType){
 		var diameter = ARROW_WIDTH/2*1.5;
 		
@@ -1172,7 +1186,7 @@ ProcessDiagramCanvas.prototype = {
 		
 		return polygone.element;
 	},
-  
+	
 	drawSequenceflowWithoutArrow: function(waypoints, conditional, isDefault, highLighted) {
 		var withArrowHead = false;
 		this._drawFlow(waypoints, conditional, isDefault, highLighted, withArrowHead, CONNECTION_TYPE.SEQUENCE_FLOW);
@@ -1331,13 +1345,13 @@ ProcessDiagramCanvas.prototype = {
 		// predefined box width for labels
 		// TODO: use label width as is, but not height (for stretching)
 		if (!width || !height) {
-		  width = 100;
-		  height = 0;
+			width = 100;
+			height = 0;
 		}
 		
 		// TODO: remove it. It is debug
 		x = x - width/2;
-	  
+		
 		this._drawMultilineText(text, x, y, width, height, MULTILINE_VERTICAL_ALIGN_TOP, MULTILINE_HORIZONTAL_ALIGN_MIDDLE);
 		
 		this.setPaint(originalPaint);
@@ -1514,7 +1528,7 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawUserTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(USERTASK_IMAGE, x + ICON_PADDING, y + ICON_PADDING, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
@@ -1522,55 +1536,55 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawScriptTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(SCRIPTTASK_IMAGE, x + ICON_PADDING, y + ICON_PADDING, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawServiceTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(SERVICETASK_IMAGE, x + ICON_PADDING, y + ICON_PADDING, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawReceiveTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(RECEIVETASK_IMAGE, x + 7, y + 7, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawSendTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(SENDTASK_IMAGE, x + 7, y + 7, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawManualTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(MANUALTASK_IMAGE, x + 7, y + 7, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawBusinessRuleTask: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawTask(name, x, y, width, height);
 		var img = this.g.image(BUSINESS_RULE_TASK_IMAGE, x + 7, y + 7, ICON_SIZE, ICON_SIZE);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawExpandedSubProcess: function(name, x, y, width, height, isTriggeredByEvent){
-	  this.g.setStart();
+		this.g.setStart();
 		// anti smoothing
 		if (this.strokeWidth%2 == 1)
 			x = Math.round(x) + .5, y = Math.round(y) + .5;
@@ -1606,17 +1620,17 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawCollapsedSubProcess: function(name, x, y, width, height, isTriggeredByEvent) {
-	  this.g.setStart();
-	  this._drawCollapsedTask(name, x, y, width, height, false);
-	  var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.g.setStart();
+		this._drawCollapsedTask(name, x, y, width, height, false);
+		var set = this.g.setFinish();
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 	
 	drawCollapsedCallActivity: function(name, x, y, width, height) {
-	  this.g.setStart();
+		this.g.setStart();
 		this._drawCollapsedTask(name, x, y, width, height, true);
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "task");
+		this.addHandlers(set, x, y, width, height, "task");
 	},
 
 	_drawCollapsedTask: function(name, x, y, width, height, thickBorder) {
@@ -1693,8 +1707,8 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawParallelGateway: function(x, y, width, height) {
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		// rhombus
 		this.drawGateway(x, y, width, height);
 
@@ -1715,8 +1729,8 @@ ProcessDiagramCanvas.prototype = {
 	},
 	
 	drawExclusiveGateway: function(x, y, width, height) {
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		// rhombus
 		var rhombus = this.drawGateway(x, y, width, height);
 
@@ -1736,12 +1750,12 @@ ProcessDiagramCanvas.prototype = {
 		this.setStroke(originalStroke);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "gateway");
+		this.addHandlers(set, x, y, width, height, "gateway");
 	},
 	
 	drawInclusiveGateway: function(x, y, width, height){
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		// rhombus
 		this.drawGateway(x, y, width, height);
 		
@@ -1756,32 +1770,32 @@ ProcessDiagramCanvas.prototype = {
 		this.setStroke(originalStroke);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "gateway");
+		this.addHandlers(set, x, y, width, height, "gateway");
 	},
 	
 	drawEventBasedGateway: function(x, y, width, height){
-	  this.g.setStart();
-	  
+		this.g.setStart();
+		
 		// rhombus
 		this.drawGateway(x, y, width, height);
 		
 		var diameter = width / 2;
 
-	    // rombus inside rhombus
-	    var originalStroke = this.getStroke();
+			// rombus inside rhombus
+			var originalStroke = this.getStroke();
 		this.setStroke(GATEWAY_TYPE_STROKE);
-	    
-	    
-	    // draw GeneralPath (polygon)
-	    var n=5;
-	    var angle = 2*Math.PI/n;
-	    var x1Points = [];
-	    var y1Points = [];
+			
+			
+			// draw GeneralPath (polygon)
+			var n=5;
+			var angle = 2*Math.PI/n;
+			var x1Points = [];
+			var y1Points = [];
 		
 		for ( var index = 0; index < n; index++ ) {
 			var v = index*angle - Math.PI/2;
 			x1Points[index] = x + parseInt(Math.round(width/2)) + parseInt(Math.round((width/4)*Math.cos(v)));
-        	y1Points[index] = y + parseInt(Math.round(height/2)) + parseInt(Math.round((height/4)*Math.sin(v)));
+					y1Points[index] = y + parseInt(Math.round(height/2)) + parseInt(Math.round((height/4)*Math.sin(v)));
 		}
 		//g.drawPolygon(x1Points, y1Points, n);
 		
@@ -1801,7 +1815,7 @@ ProcessDiagramCanvas.prototype = {
 		this.setStroke(originalStroke);
 		
 		var set = this.g.setFinish();
-    this.addHandlers(set, x, y, width, height, "gateway");
+		this.addHandlers(set, x, y, width, height, "gateway");
 	},
 	
 	/*
@@ -1945,15 +1959,15 @@ ProcessDiagramCanvas.prototype = {
 	
 	_drawPentagon: function(cx, cy, width, height, filled){
 		// draw GeneralPath (polygon)
-	    var n=5;
-	    var angle = 2*Math.PI/n;
-	    var waypoints = [];
+			var n=5;
+			var angle = 2*Math.PI/n;
+			var waypoints = [];
 		
 		for ( var index = 0; index < n; index++ ) {
 			var v = index*angle - Math.PI/2;
 			var point = {};
 			point.x = -width*1.2/2 + parseInt(Math.round(width*1.2/2)) + parseInt(Math.round((width*1.2/4)*Math.cos(v)));
-        	point.y = -height*1.2/2 + parseInt(Math.round(height*1.2/2)) + parseInt(Math.round((height*1.2/4)*Math.sin(v)));
+					point.y = -height*1.2/2 + parseInt(Math.round(height*1.2/2)) + parseInt(Math.round((height*1.2/4)*Math.sin(v)));
 			waypoints[index] = point;
 		}
 		
@@ -1975,7 +1989,7 @@ ProcessDiagramCanvas.prototype = {
 			
 		// Autostretch boxHeight if boxHeight is 0
 		if (boxHeight == 0)
-		  verticalAlign = MULTILINE_VERTICAL_ALIGN_TOP;	  
+			verticalAlign = MULTILINE_VERTICAL_ALIGN_TOP;	  
 	
 		//var TEXT_PADDING = 3;
 		var width = boxWidth;
@@ -2051,30 +2065,30 @@ ProcessDiagramCanvas.prototype = {
 	drawTextAnnotation: function(text, x, y, width, height){
 		var lineLength = 18;
 		var path = [];
-		  path.push(["M", x + lineLength, y]);
-		  path.push(["L", x, y]);
-		  path.push(["L", x, y + height]);
-		  path.push(["L", x + lineLength, y + height]);
-		  
-		  path.push(["L", x + lineLength, y + height -1]);
-		  path.push(["L", x + 1, y + height -1]);
-		  path.push(["L", x + 1, y + 1]);
-		  path.push(["L", x + lineLength, y + 1]);
-		  path.push(["z"]);
+			path.push(["M", x + lineLength, y]);
+			path.push(["L", x, y]);
+			path.push(["L", x, y + height]);
+			path.push(["L", x + lineLength, y + height]);
+			
+			path.push(["L", x + lineLength, y + height -1]);
+			path.push(["L", x + 1, y + height -1]);
+			path.push(["L", x + 1, y + 1]);
+			path.push(["L", x + lineLength, y + 1]);
+			path.push(["z"]);
 	
 		var textAreaLines = this.g.path(path);
 		
-	  var boxWidth = width - (2 * ANNOTATION_TEXT_PADDING);
-      var boxHeight = height - (2 * ANNOTATION_TEXT_PADDING);
-      var boxX = x + width/2 - boxWidth/2;
-      var boxY = y + height/2 - boxHeight/2;
-      
-      // for debug
-          var rectStyle = {stroke: Color(112, 146, 190), "stroke-width": 1.0, "stroke-dasharray": "- "};
-          var r = this.g.rect(boxX, boxY, boxWidth, boxHeight).attr(rectStyle);
-	  //
-      
-	  this.drawAnnotationText(text, boxX, boxY, boxWidth, boxHeight);
+		var boxWidth = width - (2 * ANNOTATION_TEXT_PADDING);
+			var boxHeight = height - (2 * ANNOTATION_TEXT_PADDING);
+			var boxX = x + width/2 - boxWidth/2;
+			var boxY = y + height/2 - boxHeight/2;
+			
+			// for debug
+					var rectStyle = {stroke: Color(112, 146, 190), "stroke-width": 1.0, "stroke-dasharray": "- "};
+					var r = this.g.rect(boxX, boxY, boxWidth, boxHeight).attr(rectStyle);
+		//
+			
+		this.drawAnnotationText(text, boxX, boxY, boxWidth, boxHeight);
 	},
 	
 	drawLabel111111111: function(text, x, y, width, height, labelAttrs){
