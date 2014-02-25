@@ -20,7 +20,6 @@ TBD
 TBD
 
 ###Roadmap
-* Make process builder uses Builder pattern (http://docs.camunda.org/latest/guides/user-guide/#bpmn-model-api)
 * Error Handling Solution (complete (err, cb))
 * Support NeDB disk persistence as well
 * Human Task Form (https://github.com/nimbly/angular-formly)
