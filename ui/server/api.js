@@ -96,6 +96,22 @@ exports.addRoutes = function (app) {
         res.json(instance);
       });
     });
+
+    app.get('/:id/highlights', function (req, res) {
+      processEngine.loadProcessInstance(req.params.id).done(function (instance) {
+        var hightlightModel = {
+          processInstanceId: instance.id,
+          processDefinitionId: instance.def._id
+        };
+        hightlightModel.activities = _.map(instance.nodePool, function (node) {
+          return 'task' + node.task.id;
+        });
+        hightlightModel.flows = [];
+
+        res.json(hightlightModel);
+      });
+    });
+
   });
 
 };

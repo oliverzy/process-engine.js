@@ -182,7 +182,7 @@ describe('Quick Quote Process', function() {
     }, 400);
   });
 
-  it('diagram-model', function () {
+  it.skip('diagram-model', function () {
     var diagram_model = ProcessEngine.getDiagramModel(processDefinition);
 
     //console.log(util.inspect(diagram_model, {depth: null}));

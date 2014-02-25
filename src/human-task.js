@@ -51,7 +51,8 @@ HumanTaskNode.prototype.executeInternal = function (complete) {
   var taskDef = {
     processId: this.processInstance.id,
     processName: this.processInstance.def.name,
-    processVariables: this.processInstance.variables
+    processVariables: this.processInstance.variables,
+    definitionId: this.processInstance.def._id
   };
   _.extend(taskDef, this.task);
   humanTaskService.newTask(taskDef).then(function (entity) {
@@ -93,6 +94,7 @@ HumanTaskService.prototype.newTask = function (taskDef) {
     processId: taskDef.processId,
     processName: taskDef.processName,
     processVariables: taskDef.processVariables,
+    definitionId: taskDef.definitionId,
     taskDefId: taskDef.id,
     createdTime: new Date(),
     modifiedTime: new Date()

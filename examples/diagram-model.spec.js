@@ -110,5 +110,8 @@ var diagram_model = ProcessEngine.getDiagramModel(processDefinition);
 
 console.log(util.inspect(diagram_model, {depth: null}));
 var fs = require('fs');
-fs.writeFileSync('/Users/zhouyujie/dev/process-engine.js/ui/server/sample-test-diagram.json', JSON.stringify(diagram_model));
+console.log(process.cwd());
+fs.writeFileSync('../ui/server/sample-test-diagram.json', JSON.stringify(diagram_model));
+fs.writeFileSync('../test/layouts/Quick Quote.json', JSON.stringify(diagram_model));
+
 

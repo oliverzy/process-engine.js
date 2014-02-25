@@ -41,5 +41,6 @@
   <button ng-show="currentTask.status === 'New'" class="btn btn-primary" ng-click="claim(currentTask)" class="btn btn-small" >Claim</button>
   <button ng-show="currentTask.status === 'Reserved'" class="btn btn-primary" ng-click="startWorking(currentTask)" class="btn btn-small" >Start Working</button>
   <button ng-show="currentTask.status === 'In Progress'" class="btn btn-primary" ng-click="complete(currentTask)" class="btn btn-small" >Complete</button>
+  <process-diagram instance="currentTask.processId" def="currentTask.definitionId"></process-diagram>
 </div>
 

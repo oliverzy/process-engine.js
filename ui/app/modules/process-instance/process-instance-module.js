@@ -21,7 +21,10 @@ module.controller('ProcessInstancesCtrl', function ($scope, $http) {
     $http.get('api/process-instances').success(function (data) {
       $scope.instances = _.map(data, function (instance) {
         var def = _.find($scope.defs, function (def) { return def._id === instance.def; });
-        instance.def = def.name;
+        instance.def = {
+          id: def._id,
+          name: def.name
+        };
         return instance;
       });
     });

@@ -22,7 +22,5 @@
   <legend>{{ currentDef.name }}</legend>
   <process-variables variables="currentDef.variables" result="result" editible="true"></process-variables>
   <button class="btn btn-primary" ng-click="start(currentDef)"><i class="fa fa-play"></i> Start</button>
-  <div style="overflow: scroll; width: 100%; height: 300px;">
-    <process-diagram def="currentDef"></process-diagram>
-  </div>
+  <process-diagram def="currentDef._id"></process-diagram>
 </div>

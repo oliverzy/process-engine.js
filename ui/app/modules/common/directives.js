@@ -31,22 +31,26 @@ module.directive('processDiagram', function ($compile, $http){
   return {
     restrict: 'E',
     scope: {
-      def: '='
+      def: '=',
+      instance: '='
     },
     templateUrl: 'modules/common/process-diagram.html',
     link: function ($scope, iElm, iAttrs) {
       function createDiagram() {
         $('#diagramHolder').empty();
         var DiagramGenerator = {};
-        var processDefinitionId = $scope.def._id;
-        var processInstanceId = null;
+        var processDefinitionId = $scope.def;
+        var processInstanceId = $scope.instance;
         
         ProcessDiagramGenerator.options = {
           diagramBreadCrumbsId: null,
           diagramHolderId: "diagramHolder",
           diagramInfoId: null,
           pb1: {
-            set: function () {}
+            set: function (key, value) {
+              if (processInstanceId != null && value === 100)
+                ProcessDiagramGenerator.drawHighLights(processInstanceId);
+            }
           },
           on: {
             click: function(canvas, element, contextObject){
@@ -74,10 +78,10 @@ module.directive('processDiagram', function ($compile, $http){
         }
       }
 
-      $scope.$watch('def', function(newValue, oldValue) {
+      $scope.$watch('[def, instance]', function(newValue, oldValue) {
         if (newValue)
           createDiagram(newValue);
-      });
+      }, true);
     }
 
   };
