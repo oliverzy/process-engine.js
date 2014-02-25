@@ -11,9 +11,7 @@ module.directive('processDef', function ($compile, $http){
   return {
     restrict: 'E',
     scope: {
-      def: '=',
-      width: '@',
-      height: '@'
+      def: '='
     },
     templateUrl: 'diagram.html',
     link: function ($scope, iElm, iAttrs) {
@@ -36,26 +34,13 @@ module.directive('processDef', function ($compile, $http){
             rightClick: function(canvas, element, contextObject){
             },
             over: function(canvas, element, contextObject){
-              var mouseEvent = this;
-              console.log(canvas);
-              $(element.node).qtip({ // Grab some elements to apply the tooltip to
-                content: {
-                  text: ProcessDiagramGenerator.getActivityInfo(contextObject)
-                },
-                show: {
-                  ready: true // Show the tooltip as soon as it's bound, vital so it shows up the first time you hover!
-                }
-              });
             },
             out: function(canvas, element, contextObject){
             }
           }
         };
         
-        var baseUrl = window.document.location.protocol + "//" + window.document.location.host + "/";
-        //var shortenedUrl = window.document.location.href.replace(baseUrl, "");
-        //baseUrl = baseUrl + shortenedUrl.substring(0, shortenedUrl.indexOf("/"));
-        baseUrl += 'api';
+        var baseUrl = window.document.location.protocol + "//" + window.document.location.host + "/" + "api";
         ActivitiRest.options = {
           processInstanceHighLightsUrl: baseUrl + "/process-instances/{processInstanceId}/highlights",
           processDefinitionUrl: baseUrl + "/process-definitions/{processDefinitionId}/diagram",

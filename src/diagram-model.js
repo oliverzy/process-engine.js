@@ -56,7 +56,8 @@ function createDiagramModel(processDefinition) {
         id: 'flow' + flowId,
         xPointArray: [],
         yPointArray: [],
-        isConditional: !!flow.condition
+        isConditional: !!flow.condition,
+        condition: flow.condition ? flow.condition.toString() : null
       };
     });
   }).flatten().value();

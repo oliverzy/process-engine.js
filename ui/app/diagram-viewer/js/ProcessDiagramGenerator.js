@@ -1006,18 +1006,14 @@ var ProcessDiagramGenerator = {
 	getFlowInfo: function(flow) {
 		var values = {
 			flow: flow.flow,
-			isDefault: (flow.isDefault)? "true":"",
-			isConditional: (flow.isConditional)? "true":"",
-			isHighLighted: (flow.isHighLighted)? "true":"",
 			sourceActivityId: flow.sourceActivityId,
-			destinationActivityId: flow.destinationActivityId
+			destinationActivityId: flow.destinationActivityId,
+			condition: flow.condition ? flow.condition : ""
 		};
 		var TPL_FLOW_INFO = '<div>{flow}</div>' 
 				+ '<div><b>sourceActivityId</b>: {sourceActivityId}</div>'
 				+ '<div><b>destinationActivityId</b>: {destinationActivityId}</div>'
-				+ '<div><b>isDefault</b>: {isDefault}</div>'
-				+ '<div><b>isConditional</b>: {isConditional}</div>'
-				+ '<div><b>isHighLighted</b>: {isHighLighted}</div>';
+				+ '<div><b>condition</b>: {condition}</div>';
 		var tpl = Lang.sub(TPL_FLOW_INFO, values);
 		return tpl;
 	},
@@ -1026,7 +1022,7 @@ var ProcessDiagramGenerator = {
 		var diagramInfo = $("#" + this.options.diagramInfoId);
 		if (!diagramInfo) return;
 		
-		var tpl = getFlowInfo(flow);
+		var tpl = this.getFlowInfo(flow);
 		//console.log("info: ", tpl);
 		diagramInfo.html(tpl);
 	},
@@ -1062,7 +1058,7 @@ var ProcessDiagramGenerator = {
 		var diagramInfo = $("#" + this.options.diagramInfoId);
 		if (!diagramInfo) return;
 				
-		var tpl = getActivityInfo(activity);
+		var tpl = this.getActivityInfo(activity);
 		//console.log("info: ", tpl);
 		diagramInfo.html(tpl);
 	},

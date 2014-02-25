@@ -260,6 +260,15 @@ ProcessDiagramCanvas.prototype = {
 		var border = instance.g.getById(contextObject.id + "_border");
 		border.attr("opacity", 0.3);
 
+		$(element.node).qtip({ // Grab some elements to apply the tooltip to
+      content: {
+        text: ProcessDiagramGenerator.getActivityInfo(contextObject)
+      },
+      show: {
+        ready: true // Show the tooltip as soon as it's bound, vital so it shows up the first time you hover!
+      }
+    });
+
 		// provide callback
 		if (ProcessDiagramGenerator.options && ProcessDiagramGenerator.options.on && ProcessDiagramGenerator.options.on.over) {
 			var args = [instance, element, contextObject];

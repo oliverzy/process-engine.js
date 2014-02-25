@@ -19,6 +19,7 @@
   <script src="js/ProcessDiagramCanvas.js" type="text/javascript" charset="utf-8"></script>
   
   <style type="text/css" media="screen"> -->    
+  <link rel="stylesheet" href="../css/vendor.css">
   <link rel="stylesheet" href="style.css">
   <script src="../js/vendor.js"></script>
   <script src="../js/diagram-viewer.js"></script>
@@ -29,7 +30,7 @@
   <div id="overlayBox" >
     <div id="diagramBreadCrumbs" class="diagramBreadCrumbs"></div>
     <div class="diagram-info" id="diagramInfo"></div>
-    <div id="diagramHolder" class="diagramHolder" style="margin-top: 100px;"></div>
+    <div id="diagramHolder" class="diagramHolder"></div>
   </div>
 </div>
 <script language='javascript'>
@@ -90,20 +91,17 @@ $(document).ready(function(){
       },
       rightClick: function(canvas, element, contextObject){
         var mouseEvent = this;
-        console.log("[RIGHTCLICK] mouseEvent: %o, canvas: %o, clicked element: %o, contextObject: %o", mouseEvent, canvas, element, contextObject);
+        //console.log("[RIGHTCLICK] mouseEvent: %o, canvas: %o, clicked element: %o, contextObject: %o", mouseEvent, canvas, element, contextObject);
       },
       over: function(canvas, element, contextObject){
         var mouseEvent = this;
-        console.log("[OVER] mouseEvent: %o, canvas: %o, clicked element: %o, contextObject: %o", mouseEvent, canvas, element, contextObject);
-
-        // TODO: show tooltip-window with contextObject info
-        ProcessDiagramGenerator.showActivityInfo(contextObject);
+        //console.log("[OVER] mouseEvent: %o, canvas: %o, clicked element: %o, contextObject: %o", mouseEvent, canvas, element, contextObject);
       },
       out: function(canvas, element, contextObject){
         var mouseEvent = this;
         //console.log("[OUT] mouseEvent: %o, canvas: %o, clicked element: %o, contextObject: %o", mouseEvent, canvas, element, contextObject);
 
-        ProcessDiagramGenerator.hideInfo();
+        //ProcessDiagramGenerator.hideInfo();
       }
     }
   };
