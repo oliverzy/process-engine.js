@@ -1,5 +1,5 @@
 ##Node process engine
-a minimial library for workflow and process automation for Node. It's heavily inspired by BPMN 2.0 spec.
+a minimial library for process automation for Node
 
 ###Best For
 * Task Orchestration
@@ -7,7 +7,7 @@ a minimial library for workflow and process automation for Node. It's heavily in
 * Process Management and Monitoring via a Node.js web application
 
 ###Features
-* Start/End/Decision(Exclusive Gateway)/Parallel Gateway/Service/Human Task
+* Start/End/Decision/Parallel/Service/Human Task
 * Human Task Management
 * Process Definition Management and Visualization
 * Process Instance Management
@@ -20,11 +20,12 @@ TBD
 TBD
 
 ###Roadmap
+* Support multiple process engines (process engine will not be an global instance and have own configuration)
 * Error Handling Solution (complete (err, cb))
 * Support NeDB disk persistence as well
 * Human Task Form (https://github.com/nimbly/angular-formly)
 * User Management Service
-* Histronic Process Instance
+* Separate Running and Histronic Process Instances into different collections
 * Sub Process
 * BPMN 2.0 XML Import/Export
 

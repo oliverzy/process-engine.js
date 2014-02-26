@@ -197,14 +197,15 @@ ProcessEngine.prototype.loadProcessInstance = Promise.method(function (id) {
   if (this.processPool[id])
     return this.processPool[id];
   debug('loading instance: %s', id);
-  return this.instanceCollection.findOneAsync({id: id}).then(function (entity) {
+  return this.instanceCollection.findOneAsync({id: id}).bind(this).then(function (entity) {
     debug('Load:', entity);
     if (!entity) return;
-    return ProcessInstance.deserialize(entity).then(function(instance) {
+    return ProcessInstance.deserialize(entity);
+  }).then(function (instance) {
+    if (instance)
       this.processPool[instance.id] = instance;
-      return instance;
-    }.bind(this));
-  }.bind(this));
+    return instance;
+  });
 });
 
 ProcessEngine.prototype.queryProcessInstances = function (conditions) {
