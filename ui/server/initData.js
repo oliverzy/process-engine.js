@@ -7,7 +7,7 @@ function init(app) {
   var processBuilder = processEngine.processBuilder;
 
   (function () {
-    var processDefinition = new ProcessDefinition('simple process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple process');
     processDefinition.category = 'Basic';
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
@@ -25,7 +25,7 @@ function init(app) {
   })();
 
   (function () {
-    var processDefinition = new ProcessDefinition('simple parallel process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple parallel process');
     processDefinition.category = 'Basic';
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
@@ -54,7 +54,7 @@ function init(app) {
 
 
   (function () {
-    var processDefinition = new ProcessDefinition('simple exclusive gateway process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple exclusive gateway process');
     processDefinition.category = 'Basic';
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
@@ -98,7 +98,7 @@ function init(app) {
   })();
 
   (function () {
-    var processDefinition = new ProcessDefinition('exclusive gateway + parrallel gateway process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('exclusive gateway + parrallel gateway process');
     processDefinition.category = 'Basic';
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
@@ -152,7 +152,7 @@ function init(app) {
   })();
 
   (function () {
-    var processDefinition = new ProcessDefinition('simple human process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple human process');
     processDefinition.category = 'Basic';
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
@@ -176,7 +176,7 @@ function init(app) {
   })();
 
   (function () {
-    var processDefinition = new ProcessDefinition('human process with cycle', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('human process with cycle');
     processDefinition.category = 'Basic';
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
@@ -216,7 +216,7 @@ function init(app) {
 
 
   (function () {
-    var processDefinition = new ProcessDefinition('Quick Quote', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('Quick Quote');
     processDefinition.category = 'Insurance';
     // Tasks
     var startTask = processBuilder.startTask();

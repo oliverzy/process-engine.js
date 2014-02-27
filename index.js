@@ -12,6 +12,10 @@ ProcessEngine.Diagram = Diagram;
 ProcessEngine.InstanceStatus = ProcessInstance.Instance.STATUS;
 ProcessEngine.HumanTaskServiceStatus = HumanTask.Service.STATUS;
 
+ProcessEngine.prototype.createProcessDefinition = function (name) {
+  return new ProcessDefinition(name, this);
+};
+
 ProcessEngine.create = function (options_) {
   var options = options_ || {};
   

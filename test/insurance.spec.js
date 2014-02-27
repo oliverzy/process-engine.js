@@ -10,7 +10,7 @@ var _ = require('lodash');
 
 describe('Quick Quote Process', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('Quick Quote', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('Quick Quote');
     // Tasks
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);

@@ -14,7 +14,7 @@ var _ = require('lodash');
  */
 describe('simple process', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('simple process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple process');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
     var serviceTask = processBuilder.serviceTask(function (variables, complete) {
@@ -66,7 +66,7 @@ describe('simple process', function() {
  */
 describe('simple parallel process', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('simple parallel process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple parallel process');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
 
@@ -125,7 +125,7 @@ describe('simple parallel process', function() {
  */
 describe('simple exclusive gateway process', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('simple exclusive gateway process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple exclusive gateway process');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
 
@@ -199,7 +199,7 @@ describe('simple exclusive gateway process', function() {
  */
 describe('exclusive gateway + parrallel gateway process', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('exclusive gateway + parrallel gateway process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('exclusive gateway + parrallel gateway process');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
 
@@ -279,7 +279,7 @@ describe('exclusive gateway + parrallel gateway process', function() {
  */
 describe('simple human process', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('simple human process', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple human process');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
     var humanTask = processBuilder.humanTask();
@@ -335,7 +335,7 @@ describe('simple human process', function() {
  */
 describe('simple human process persistence', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('simple human process persistence', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('simple human process persistence');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
     var humanTask = processBuilder.humanTask();
@@ -400,7 +400,7 @@ describe('simple human process persistence', function() {
  */
 describe('human process with cycle', function() {
   function createProcessDefinition() {
-    var processDefinition = new ProcessDefinition('human process with cycle', processEngine);
+    var processDefinition = processEngine.createProcessDefinition('human process with cycle');
     var startTask = processBuilder.startTask();
     processDefinition.addTask(startTask);
     var serviceTask = processBuilder.serviceTask(function (variables, complete) {
