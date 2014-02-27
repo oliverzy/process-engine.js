@@ -3,10 +3,9 @@ var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
 var Task = require('./process-definition.js').Task;
 var ProcessEngine = require('./process-engine.js');
-var processEngine = ProcessEngine.processEngine,
-    ProcessInstance = ProcessEngine.ProcessInstance,
-    Node = ProcessEngine.Node;
-var Datastore = require('nedb');
+var ProcessInstance = require('./process-instance.js'),
+    Instance = ProcessInstance.Instance,
+    Node = ProcessInstance.Node;
 var Promise = require("bluebird");
 var debug = require('debug')('human-task');
 
@@ -15,8 +14,6 @@ var debug = require('debug')('human-task');
  * we can query/change task state without loading/saving process instances
  * until the task status is changed to complete
  */
-var humanTaskCollection = new Datastore();
-Promise.promisifyAll(humanTaskCollection);
 
 function HumanTask() {
   HumanTask.super_.apply(this, arguments);
@@ -55,14 +52,15 @@ HumanTaskNode.prototype.executeInternal = function (complete) {
     definitionId: this.processInstance.def._id
   };
   _.extend(taskDef, this.task);
-  humanTaskService.newTask(taskDef).then(function (entity) {
+  this.processInstance.engine.humanTaskService.newTask(taskDef).then(function (entity) {
     this.taskEntityId = entity._id;
     // Put it in the waiting status
-    return this.processInstance.changeStatus(ProcessInstance.STATUS.WAITING);
+    return this.processInstance.changeStatus(Instance.STATUS.WAITING);
   }.bind(this)).done();
 };
 
-function HumanTaskService() {
+function HumanTaskService(engine) {
+  this.engine = engine;
 }
 
 HumanTaskService.STATUS = {
@@ -74,14 +72,16 @@ HumanTaskService.STATUS = {
   COMPLETED: 'Completed'
 };
 HumanTaskService.prototype.complete = function (taskId, variables) {
-  return this.queryOne({'_id': taskId}).then(function (task) {
+  return this.queryOne({'_id': taskId}).bind(this).then(function (task) {
     if (!task) throw new Error('No task is found!');
     task.status = HumanTaskService.STATUS.COMPLETED;
+    return task;
+  }).then(function (task) {
     return this.saveTask(task).done(function () {
       if (task.processId !== undefined)
-        processEngine.completeTask(task.processId, task.taskDefId, variables);
-    });
-  }.bind(this));
+        this.engine.completeTask(task.processId, task.taskDefId, variables);
+    }.bind(this));
+  });
 };
 
 HumanTaskService.prototype.newTask = function (taskDef) {
@@ -100,16 +100,16 @@ HumanTaskService.prototype.newTask = function (taskDef) {
     modifiedTime: new Date()
   };
   
-  return humanTaskCollection.insertAsync(task);
+  return this.engine.humanTaskCollection.insertAsync(task);
 };
 
 HumanTaskService.prototype.saveTask = function (task) {
   task.modifiedTime = new Date();
-  return humanTaskCollection.updateAsync({'_id': task._id}, task, {});
+  return this.engine.humanTaskCollection.updateAsync({'_id': task._id}, task, {});
 };
 
 HumanTaskService.prototype.claim = function (taskId, user) {
-  return humanTaskCollection.findOneAsync({'_id': taskId})
+  return this.engine.humanTaskCollection.findOneAsync({'_id': taskId})
   .then(function (task) {
     if (task) {
       if (task.assignee === user) return;
@@ -130,19 +130,17 @@ HumanTaskService.prototype.startWorking = function (taskId) {
 };
 
 HumanTaskService.prototype.query = function (conditions) {
-  return humanTaskCollection.findAsync(conditions);
+  return this.engine.humanTaskCollection.findAsync(conditions);
 };
 
 HumanTaskService.prototype.queryOne = function (conditions) {
-  return humanTaskCollection.findOneAsync(conditions);
+  return this.engine.humanTaskCollection.findOneAsync(conditions);
 };
-var humanTaskService = new HumanTaskService();
 
-
-processEngine.registerTaskType('human-task', HumanTask, HumanTaskNode);
 
 module.exports = {
-  humanTaskService: humanTaskService,
-  status: HumanTaskService.STATUS
+  Service: HumanTaskService,
+  Task: HumanTask,
+  Node: HumanTaskNode
 };
 

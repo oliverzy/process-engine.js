@@ -7,4 +7,4 @@
 * Process Diagram Viewer
 
 ###Roadmap
-* Integrate BPMN 2.0 Web Designer (http://www.mossle.com/lemon-dev-modeler.html or http://bpmn.io/)
+* Process Diagram Web Designer (http://bpmn.io/)

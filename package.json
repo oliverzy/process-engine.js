@@ -1,7 +1,7 @@
 {
   "name": "process-engine",
-  "version": "0.0.0",
-  "description": "Javascript Process Engine inspired by BPMN 2.0",
+  "version": "0.5.0",
+  "description": "Javascript Process Engine",
   "main": "index.js",
   "scripts": {
     "test": "mocha -R spec test",

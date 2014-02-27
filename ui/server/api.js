@@ -1,11 +1,12 @@
 var _ = require('lodash');
 var ProcessEngine = require('process-engine');
-var humanTaskService = ProcessEngine.humanTaskService;
 var ProcessDefinition = ProcessEngine.ProcessDefinition;
-var processEngine = ProcessEngine.processEngine;
 
 exports.addRoutes = function (app) {
-  // JSON API
+  var processEngine = app.get('processEngine');
+  var humanTaskService = processEngine.humanTaskService;
+
+  // TEST
   app.get('/api/name', function (req, res) {
     res.json({
       name: 'Oliver Zhou'
@@ -47,28 +48,30 @@ exports.addRoutes = function (app) {
     });
   });
 
-  app.get('/api/process-definitions', function (req, res) {
-    ProcessDefinition.query({}).done(function (defs) {
-      res.json(defs);
-    });
-  });
-
-  app.get('/api/process-definitions/:id/diagram', function (req, res) {
-    if (req.params.id)
-      ProcessDefinition.load(req.params.id).done(function (def) {
-        var diagram_model = ProcessEngine.getDiagramModel(def);
-        return res.json(diagram_model);
+  app.namespace('/api/process-definitions', function () {
+    app.get('/', function (req, res) {
+      ProcessDefinition.query(processEngine, {}).done(function (defs) {
+        res.json(defs);
       });
-    else
-      res.status(200).send();
-  });
+    });
 
-  app.post('/api/process-definitions/:id/start', function (req, res) {
-    ProcessDefinition.load(req.params.id).done(function (def) {
-      var instance = processEngine.createProcessInstance(def);
-      instance.start(req.body);
-      res.json({id: instance.id});
-      console.log(instance.id, 'is started');
+    app.get('/:id/diagram', function (req, res) {
+      if (req.params.id)
+        ProcessDefinition.load(processEngine, req.params.id).done(function (def) {
+          var diagram_model = ProcessEngine.Diagram.getDiagramModel(def);
+          return res.json(diagram_model);
+        });
+      else
+        res.status(200).send();
+    });
+
+    app.post('/:id/start', function (req, res) {
+      ProcessDefinition.load(processEngine, req.params.id).done(function (def) {
+        var instance = processEngine.createProcessInstance(def);
+        instance.start(req.body);
+        res.json({id: instance.id});
+        console.log(instance.id, 'is started');
+      });
     });
   });
 

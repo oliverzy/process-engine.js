@@ -3,11 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
-var Datastore = require('nedb');
 var Promise = require("bluebird");
-
-var definitionCollection = new Datastore();
-Promise.promisifyAll(definitionCollection);
 
 /**
 * [CORE] Task Definition: Represent a abstract task in the process definition
@@ -60,33 +56,6 @@ Task.deserialize = function (entity) {
   return task;
 };
 
-/**
- * Exclusive Gateway
- */
-function Decision() {
-  Decision.super_.apply(this, arguments);
-  this.type = 'decision';
-}
-util.inherits(Decision, Task);
-
-function ServiceTask(action) {
-  ServiceTask.super_.apply(this, arguments);
-  this.type = 'service-task';
-  this.action = action;
-}
-util.inherits(ServiceTask, Task);
-
-ServiceTask.prototype.serialize = function () {
-  var entity = ServiceTask.super_.prototype.serialize.call(this);
-  entity.action = this.action.toString();
-  return entity;
-};
-
-ServiceTask.prototype.deserialize = function (entity) {
-  ServiceTask.super_.prototype.deserialize.call(this, entity);
-  eval('this.action = ' + entity.action);
-};
-
 
 /**
  * The factory class to create different kinds of tasks for the client
@@ -115,7 +84,8 @@ var processBuilder = new ProcessBuilder();
 /**
  * [CORE] The definiton of the process which can be executed by process engine
  */
-function ProcessDefinition(name) {
+function ProcessDefinition(name, engine) {
+  this.engine = engine;
   this.name = name;
   this.tasks = {};
   this.nextTaskId = 0;
@@ -163,8 +133,8 @@ ProcessDefinition.prototype.serialize = function () {
   return entity;
 };
 
-ProcessDefinition.deserialize = function (entity) {
-  var def = new ProcessDefinition();
+ProcessDefinition.deserialize = function (engine, entity) {
+  var def = new ProcessDefinition(null, engine);
   def._id = entity._id;
   def.name = entity.name;
   def.variables = entity.variables;
@@ -197,29 +167,28 @@ ProcessDefinition.deserialize = function (entity) {
 ProcessDefinition.prototype.save = function () {
   var entity = this.serialize();
   if (entity._id)
-    return definitionCollection.updateAsync({'_id': entity._id}, entity, {}).then(function() {
+    return this.engine.definitionCollection.updateAsync({'_id': entity._id}, entity, {}).then(function() {
       return entity;
     });
   else
-    return definitionCollection.insertAsync(entity).then(function (entity) {
+    return this.engine.definitionCollection.insertAsync(entity).then(function (entity) {
       this._id = entity._id;
       return this;
     }.bind(this));
 };
 
-ProcessDefinition.load = function (id) {
-  return definitionCollection.findOneAsync({'_id': id}).then(function (entity) {
-    //console.log(entity);
-    return ProcessDefinition.deserialize(entity);
+ProcessDefinition.load = function (engine, id) {
+  return engine.definitionCollection.findOneAsync({'_id': id}).then(function (entity) {
+    return ProcessDefinition.deserialize(engine, entity);
   });
 };
 
-ProcessDefinition.query = function (conditions, options) {
+ProcessDefinition.query = function (engine, conditions, options) {
   if (!options)
-    return definitionCollection.findAsync(conditions);
+    return engine.definitionCollection.findAsync(conditions);
   else
     return new Promise(function (resolve, reject) {
-      var cursor = definitionCollection.find(conditions);
+      var cursor = engine.definitionCollection.find(conditions);
       if (options.sort)
         cursor.sort(options.sort);
       if (options.limit)
@@ -234,7 +203,5 @@ ProcessDefinition.query = function (conditions, options) {
 
 ProcessDefinition.processBuilder = processBuilder;
 ProcessDefinition.Task = Task;
-ProcessDefinition.ServiceTask = ServiceTask;
-ProcessDefinition.Decision = Decision;
 module.exports = ProcessDefinition;
 

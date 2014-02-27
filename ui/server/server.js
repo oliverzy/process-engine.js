@@ -1,8 +1,9 @@
 var Promise = require("bluebird");
 Promise.longStackTraces();
+var ProcessEngine = require('process-engine');
+var processEngine = ProcessEngine.create();
 var express = require('express'),
   namespace = require('express-namespace'),
-  partialResponse = require('express-partial-response'),
   http = require('http'),
   path = require('path'),
   Datastore = require('nedb');
@@ -12,6 +13,7 @@ var app = module.exports = express();
  * Configuration
  */
 app.set('port', process.env.PORT || 3000);
+app.set('processEngine', processEngine);
 app.use(express.logger('dev'));
 app.use(express.cookieParser());
 app.use(express.cookieSession({secret: 'some secret'}));
@@ -19,11 +21,10 @@ app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(app.router);
-app.use(partialResponse());
 app.use(express.errorHandler());
 
 // Initial Data
-require('./initData.js');
+require('./initData.js')(app);
 
 // Serve index
 var index = function(req, res){

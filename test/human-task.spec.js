@@ -1,8 +1,10 @@
 var Promise = require("bluebird");
 Promise.longStackTraces();
 var expect = require('chai').expect;
-var humanTaskService = require('../').humanTaskService;
-var STATUS = require('../').status;
+var ProcessEngine = require('../');
+var processEngine = ProcessEngine.create();
+var STATUS = ProcessEngine.HumanTaskServiceStatus;
+var humanTaskService = processEngine.humanTaskService;
 
 describe('human task service', function () {
   it('create new human task with assignee', function (done) {

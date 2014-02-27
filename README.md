@@ -1,5 +1,5 @@
 ##Node process engine
-a minimial library for process automation for Node
+Process automation for Node.js
 
 ###Best For
 * Task Orchestration
@@ -20,14 +20,11 @@ TBD
 TBD
 
 ###Roadmap
-* Support multiple process engines (process engine will not be an global instance and have own configuration)
 * Error Handling Solution (complete (err, cb))
-* Support NeDB disk persistence as well
+* Support NeDB/MongoDB disk persistence
+* Performance Benchmark
 * Human Task Form (https://github.com/nimbly/angular-formly)
 * User Management Service
 * Separate Running and Histronic Process Instances into different collections
 * Sub Process
 * BPMN 2.0 XML Import/Export
-
-###Reference
-BPMN 2.0 - http://www.camunda.org/bpmn/reference.html
