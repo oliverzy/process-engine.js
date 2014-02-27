@@ -3,10 +3,18 @@
   "version": "0.5.0",
   "description": "Javascript Process Engine",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/oliverzy/process-engine.js.git"
+  },
   "scripts": {
     "test": "mocha -R spec test",
     "coverage": "istanbul cover _mocha test"
   },
+  "keywords": [
+    "workflow",
+    "process engine"
+  ],
   "author": "Oliver Zhou",
   "license": "BSD-2-Clause",
   "dependencies": {

@@ -1,5 +1,4 @@
-##Node process engine
-Process automation for Node.js
+*Process automation for Node.js*
 
 ###Best For
 * Task Orchestration
@@ -11,7 +10,6 @@ Process automation for Node.js
 * Human Task Management
 * Process Definition Management and Visualization
 * Process Instance Management
-* Process Diagram Generator
 
 ###Get Started
 TBD
@@ -20,11 +18,16 @@ TBD
 TBD
 
 ###Roadmap
-* Error Handling Solution (complete (err, cb))
-* Support NeDB/MongoDB disk persistence
-* Performance Benchmark
-* Human Task Form (https://github.com/nimbly/angular-formly)
-* User Management Service
-* Separate Running and Histronic Process Instances into different collections
-* Sub Process
-* BPMN 2.0 XML Import/Export
+* 0.6
+  * Error Handling
+  * Documentation (Absoulutely needed before publishing to Github and NPM)
+* 0.7
+  * Support NeDB/MongoDB disk persistence
+  * Performance Benchmark
+* 0.8
+  * Human Task Form (https://github.com/nimbly/angular-formly)
+  * User Management Service
+* Future
+  * Separate Running and Histronic Process Instances into different collections
+  * Sub Process
+  * BPMN 2.0 XML Import/Export

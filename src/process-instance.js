@@ -128,7 +128,7 @@ Node.deserialize = function (entity, instance) {
   return node;
 };
 
-var API = {
+var engineAPI = {
   createProcessInstance: function (def) {
     var processInstance = new ProcessInstance(def);
     processInstance.id = this.nextProcessId++;
@@ -298,6 +298,6 @@ ProcessInstance.deserialize = function (engine, entity) {
 module.exports = {
   Instance: ProcessInstance,
   Node: Node,
-  API: API
+  API: engineAPI
 };
 
