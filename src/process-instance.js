@@ -62,7 +62,12 @@ Node.prototype.canExecuteNode = function () {
 /**
  * The method is called when the node execution is done
  */
-Node.prototype.complete = function (variables) {
+Node.prototype.complete = function (err, variables) {
+  if (err) {
+    return this.processInstance.changeStatus(ProcessInstance.STATUS.FAILED, err).bind(this).done(function () {
+      this.processInstance.emit('end');
+    });
+  }
   if (variables)
     this.processInstance.variables = _.clone(variables, true);
   this.processInstance.emit('after', this.task);
@@ -140,11 +145,11 @@ var engineAPI = {
     debug('Complete', processId, taskId);
     if (!this.processPool[processId]) {
       return this.loadProcessInstance(processId).done(function (instance) {
-        this.processPool[processId].nodePool[taskId].complete(variables);
+        this.processPool[processId].nodePool[taskId].complete(null, variables);
       }.bind(this));
     }
     else
-      return this.processPool[processId].nodePool[taskId].complete(variables);
+      return this.processPool[processId].nodePool[taskId].complete(null, variables);
   }),
 
   loadProcessInstance: Promise.method(function (id) {
@@ -187,6 +192,7 @@ function ProcessInstance(def) {
   this.nodePool = {};
   this.status = ProcessInstance.STATUS.NEW;
   this.variables = {};
+  this.error = null;
 }
 util.inherits(ProcessInstance, EventEmitter);
 
@@ -235,8 +241,9 @@ ProcessInstance.prototype.start = function (variables) {
 /**
  * @return {Promise}
  */
-ProcessInstance.prototype.changeStatus = function (status) {
+ProcessInstance.prototype.changeStatus = function (status, err) {
   this.status = status;
+  this.error = err;
   return this.save();
 };
 
@@ -268,7 +275,8 @@ ProcessInstance.prototype.serialize = function () {
     def: this.def._id,
     status: this.status,
     nodePool: serializeNodePool(),
-    variables: this.variables
+    variables: this.variables,
+    error: this.error
   };
   return entity;
 };
@@ -282,6 +290,7 @@ ProcessInstance.deserialize = function (engine, entity) {
     instance.id = entity.id;
     instance.status = entity.status;
     instance.variables = entity.variables;
+    instance.error = entity.error;
     entity.nodePool.forEach(function (entity) {
       var node = Node.deserialize(entity, instance);
       instance.nodePool[node.task.id] = node;

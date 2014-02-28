@@ -467,10 +467,45 @@ describe('human process with cycle', function() {
   });
 });
 
+describe('simple process with error', function() {
+  function createProcessDefinition() {
+    var processDefinition = processEngine.createProcessDefinition('simple process');
+    var startTask = processBuilder.startTask();
+    processDefinition.addTask(startTask);
+    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
+      console.log('Oh, service task with error');
+      complete({error: 'this is an error message'});
+    });
+    processDefinition.addTask(serviceTask);
+    var endTask = processBuilder.endTask();
+    processDefinition.addTask(endTask);
+    processDefinition.addFlow(startTask, serviceTask);
+    processDefinition.addFlow(serviceTask, endTask);
+
+    return processDefinition;
+  }
+
+  var processInstance;
+  beforeEach(function() {
+    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+  });
+
+  it('should pass', function(done) {
+    processInstance.on('end', function () {
+      expect(processInstance.status).to.be.equal(INSTANCE_STATUS.FAILED);
+      expect(processInstance.error).to.be.deep.equal({error: 'this is an error message'});
+
+      done();
+    });
+
+    processInstance.start();
+  });
+});
+
 describe('process definition query', function() {
   it('total', function (done) {
     processEngine.queryProcessDefinition({}).done(function (defs) {
-      expect(defs.length).to.be.equal(7);
+      expect(defs.length).to.be.equal(8);
       done();
     });
   });
