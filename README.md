@@ -65,7 +65,10 @@ __See tests for all usage that process engine supports__
   * `queryProcessInstance(conditions)`: Query process instances by conditions
   * `completeTask(processId, taskId, variables)`: Complete a task with `processId`, `taskId`, `variables`
 * `ProcessInstance` is a Node event emitter. 
-It will emit `before` event before each task is executed, `after` event after each task is executed, `end` when the whole process instance is ended.
+  * `Events`
+    * `before`: emitted before each task is executed
+    * `after`: emitted after each task is executed
+    * `end`: emitted when the whole process instance is ended
   * `start(variables)`: Start the process instance with given `variables`
   * `getNode(taskName)`: Get the runtime node with `taskName`
 * `HumanTaskService`
@@ -77,6 +80,11 @@ It will emit `before` event before each task is executed, `after` event after ea
 ###UI
 process-engine.js contains a Node.js web application to manage the process instances and human task list.
 Go to `ui` folder, use `brunch watch --server` to launch the server, then open `http://localhost:3000/#/definitions` in your browser.
+
+###Development
+* Test Runner: `npm install -g mocha`
+* Front End Build: `npm install -g brunch`
+* Code Coverage: `npm install -g istanbul`
 
 ###Roadmap
 * Planned
