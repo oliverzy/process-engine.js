@@ -79,10 +79,15 @@ __See tests for all usage that process engine supports__
 
 ###UI
 process-engine.js contains a Node.js web application to manage the process instances and human task list.
-Go to `ui` folder, use `brunch watch --server` to launch the server, then open `http://localhost:3000/#/definitions` in your browser.
+* Go to `ui` folder
+* Run `npm install`
+* Run `bower install` 
+* Run `brunch watch --server` to launch the server
+* Open `http://localhost:3000/#/definitions` in your browser
 
 ###Development
 * Test Runner: `npm install -g mocha`
+* Front End Package Manager: `npm install -g bower`
 * Front End Build: `npm install -g brunch`
 * Code Coverage: `npm install -g istanbul`
 
