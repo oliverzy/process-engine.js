@@ -50,14 +50,14 @@ exports.addRoutes = function (app) {
 
   app.namespace('/api/process-definitions', function () {
     app.get('/', function (req, res) {
-      ProcessDefinition.query(processEngine, {}).done(function (defs) {
+      processEngine.queryProcessDefinition({}).done(function (defs) {
         res.json(defs);
       });
     });
 
     app.get('/:id/diagram', function (req, res) {
       if (req.params.id)
-        ProcessDefinition.load(processEngine, req.params.id).done(function (def) {
+        processEngine.loadProcessDefinition(req.params.id).done(function (def) {
           var diagram_model = ProcessEngine.Diagram.getDiagramModel(def);
           return res.json(diagram_model);
         });
@@ -66,7 +66,7 @@ exports.addRoutes = function (app) {
     });
 
     app.post('/:id/start', function (req, res) {
-      ProcessDefinition.load(processEngine, req.params.id).done(function (def) {
+      processEngine.loadProcessDefinition(req.params.id).done(function (def) {
         var instance = processEngine.createProcessInstance(def);
         instance.start(req.body);
         res.json({id: instance.id});

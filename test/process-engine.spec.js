@@ -469,14 +469,14 @@ describe('human process with cycle', function() {
 
 describe('process definition query', function() {
   it('total', function (done) {
-    ProcessDefinition.query(processEngine, {}).done(function (defs) {
+    processEngine.queryProcessDefinition({}).done(function (defs) {
       expect(defs.length).to.be.equal(7);
       done();
     });
   });
 
   it('limit', function (done) {
-    ProcessDefinition.query(processEngine, {}, {limit: 5}).done(function (defs) {
+    processEngine.queryProcessDefinition({}, {limit: 5}).done(function (defs) {
       expect(defs.length).to.be.equal(5);
       done();
     });

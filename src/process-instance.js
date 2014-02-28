@@ -277,7 +277,7 @@ ProcessInstance.prototype.serialize = function () {
  * @return {[Promise]}
  */
 ProcessInstance.deserialize = function (engine, entity) {
-  return ProcessDefinition.load(engine, entity.def).then(function (def) {
+  return engine.loadProcessDefinition(entity.def).then(function (def) {
     var instance = new ProcessInstance(def);
     instance.id = entity.id;
     instance.status = entity.status;

@@ -177,31 +177,40 @@ ProcessDefinition.prototype.save = function () {
     }.bind(this));
 };
 
-ProcessDefinition.load = function (engine, id) {
-  return engine.definitionCollection.findOneAsync({'_id': id}).then(function (entity) {
-    return ProcessDefinition.deserialize(engine, entity);
-  });
-};
+var engineAPI = {
+  createProcessDefinition: function (name) {
+    return new ProcessDefinition(name, this);
+  },
 
-ProcessDefinition.query = function (engine, conditions, options) {
-  if (!options)
-    return engine.definitionCollection.findAsync(conditions);
-  else
-    return new Promise(function (resolve, reject) {
-      var cursor = engine.definitionCollection.find(conditions);
-      if (options.sort)
-        cursor.sort(options.sort);
-      if (options.limit)
-        cursor.limit(options.limit);
-      cursor.exec(function (err, result) {
-        if (err) return reject(err);
-        resolve(result);
-      });
+  loadProcessDefinition: function (id) {
+    var engine = this;
+    return engine.definitionCollection.findOneAsync({'_id': id}).then(function (entity) {
+      return ProcessDefinition.deserialize(engine, entity);
     });
+  },
+
+  queryProcessDefinition: function (conditions, options) {
+    var engine = this;
+    if (!options)
+      return engine.definitionCollection.findAsync(conditions);
+    else
+      return new Promise(function (resolve, reject) {
+        var cursor = engine.definitionCollection.find(conditions);
+        if (options.sort)
+          cursor.sort(options.sort);
+        if (options.limit)
+          cursor.limit(options.limit);
+        cursor.exec(function (err, result) {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      });
+  }
 };
 
 
 ProcessDefinition.processBuilder = processBuilder;
 ProcessDefinition.Task = Task;
+ProcessDefinition.API = engineAPI;
 module.exports = ProcessDefinition;
 
