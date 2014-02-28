@@ -93,10 +93,9 @@ process-engine.js contains a Node.js web application to manage the process insta
 
 ###Roadmap
 * Planned
-  * Error Handling
-  * Performance Benchmark
-  * Human Task Form (https://github.com/nimbly/angular-formly)
+  * Human Task Form Builder
   * User Management Service
+  * Performance Benchmark
 * Future
   * Separate Running and Histronic Process Instances into different collections
   * Sub Process
