@@ -78,6 +78,8 @@ __See tests for all usage that process engine supports__
   * `query(conditions)`: Query the human tasks by `conditions`
 
 ###UI
+![image](https://dl-web.dropbox.com/get/Public/Snip20140301_2.png?_subject_uid=54970183&w=AAAG9ahT5xMFHNopGp1xlVFEji1eo3fwHyB94Xl-0F3h3g)
+
 process-engine.js contains a Node.js web application to manage the process instances and human task list.
 * Go to `ui` folder
 * Run `npm install`
