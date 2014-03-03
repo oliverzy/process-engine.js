@@ -48,7 +48,8 @@ __See examples/tests for all usage that process engine supports__
 
 ###API
 * `ProcessEngine`
-  * `createProcessDefinition(name)`: Create a new process definition with `name`
+  * `importProcessDefinition(definition)`: Create a new process definition based on `definition` object
+  * `createProcessDefinition(name)`: Create an empty process definition with `name`
   * `loadProcessDefinition(id)`: Load a process definition by `id`
   * `queryProcessDefinition(conditions, options)`: Query process definitions by conditions and options
   * `createProcessInstance(def)`: Create a new process instance with definition `def `
