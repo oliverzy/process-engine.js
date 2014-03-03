@@ -107,6 +107,9 @@ ProcessDefinition.prototype.addTask = function (task) {
  * @param {[function]} condition
  */
 ProcessDefinition.prototype.addFlow = function (taskFrom, taskTo, condition) {
+  if (!taskFrom || !taskTo)
+    throw new Error('taskFrom or taskTo cannot be empty');
+
   var flow = {
     from: taskFrom,
     to: taskTo,
@@ -205,6 +208,37 @@ var engineAPI = {
           resolve(result);
         });
       });
+  },
+
+  importProcessDefinition: function(definition) {
+    var engine = this;
+    var processDefinition = engine.createProcessDefinition(definition.name);
+    processDefinition.category = definition.category;
+
+    var taskByName = {};
+    _.each(definition.tasks, function (task_, name) {
+      var task = processBuilder[task_.type] ? processBuilder[task_.type]() : processBuilder[task_.type + 'Task']();
+      task.name = name;
+      _.each(task_, function (value, key) {
+        if (key !== 'type')
+          task[key] = value;
+      });
+
+      processDefinition.addTask(task);
+      taskByName[task.name] = task;
+    });
+
+    _.each(definition.flows, function (flow) {
+      if (!taskByName[flow.from])
+        throw new Error('task[' + flow.from + '] of flow.from does not exist');
+      if (!taskByName[flow.to])
+        throw new Error('task[' + flow.to + '] of flow.to does not exist');
+      processDefinition.addFlow(taskByName[flow.from], taskByName[flow.to], flow.condition);
+    });
+
+    processDefinition.variables = _.clone(definition.variables, true);
+
+    return processDefinition;
   }
 };
 

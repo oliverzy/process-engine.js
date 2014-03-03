@@ -1,6 +1,6 @@
 {
   "name": "process-engine",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Javascript Process Engine",
   "main": "index.js",
   "repository": {

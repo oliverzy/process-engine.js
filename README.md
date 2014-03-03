@@ -19,41 +19,32 @@ __Process automation for Node.js__
 var ProcessEngine = require('process-engine');
 // Create a process engine object
 var processEngine = ProcessEngine.create();
-// Process Builder is used to create tasks
-var processBuilder = processEngine.processBuilder;
+var simpleDefinition = {
+  name: 'simple process',
+  tasks: {
+    start: {type: 'start'},
+    'service1': {type: 'service', action: function (variables, complete) {
+        console.log('do work');
+        complete();
+      }
+    },
+    end: {type: 'end'}
+  },
 
-function createProcessDefinition() {
-    // Create a new process definition object
-    var processDefinition = processEngine.createProcessDefinition('simple process');
-    // Each process must have a start task as the first task
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-    
-    // A service task is used to execute any business logic
-    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task');
-      complete();
-    });
-    processDefinition.addTask(serviceTask);
-    
-    // An end task means the end of process
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    
-    // Connect all tasks with flow
-    processDefinition.addFlow(startTask, serviceTask);
-    processDefinition.addFlow(serviceTask, endTask);
-
-    return processDefinition;
-}
+  flows: [
+    {from: 'start', to: 'service1'},
+    {from: 'service1', to: 'end'}
+  ]
+};
 
 // Create process instance from the above process definition
-var processInstance = processEngine.createProcessInstance(createProcessDefinition());
+var processDefinition = processEngine.importProcessDefinition(simpleDefinition);
+var processInstance = processEngine.createProcessInstance(processDefinition);
 // Start the execution of the process instance
 processInstance.start();
 ```
 
-__See tests for all usage that process engine supports__
+__See examples/tests for all usage that process engine supports__
 
 ###API
 * `ProcessEngine`

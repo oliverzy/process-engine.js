@@ -215,7 +215,7 @@ ProcessInstance.prototype.getNode = function (taskName) {
 };
 
 ProcessInstance.prototype._start = function (variables) {
-  this.variables = variables;
+  this.variables = variables || this.def.variables;
   return this.changeStatus(ProcessInstance.STATUS.RUNNING).done(function () {
     var node = new Node(this.def.tasks[0], this);
     node.execute();

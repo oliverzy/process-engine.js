@@ -8,31 +8,12 @@ var processEngine = ProcessEngine.create(),
     INSTANCE_STATUS = ProcessEngine.InstanceStatus,
     humanTaskService = processEngine.humanTaskService;
 var _ = require('lodash');
+var samples = require('../examples/basic-processes.js');
 
-/**
- * start -> service task -> end
- */
 describe('simple process', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('simple process');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task');
-      complete();
-    });
-    processDefinition.addTask(serviceTask);
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, serviceTask);
-    processDefinition.addFlow(serviceTask, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.simple));
   });
 
   it('should pass', function(done) {
@@ -57,44 +38,10 @@ describe('simple process', function() {
   });
 });
 
-/**
- *       ---- service task 1 ----
- *      -                        -
- * start                          end
- *      -                        -
- *       ---- service task 2 ----
- */
 describe('simple parallel process', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('simple parallel process');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-
-    var serviceTask1 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task1');
-      complete();
-    });
-    processDefinition.addTask(serviceTask1);
-
-    var serviceTask2 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task2');
-      complete();
-    });
-    processDefinition.addTask(serviceTask2);
-
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, serviceTask1);
-    processDefinition.addFlow(startTask, serviceTask2);
-    processDefinition.addFlow(serviceTask1, endTask);
-    processDefinition.addFlow(serviceTask2, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.parallel));
   });
 
   it('should pass', function(done) {
@@ -116,57 +63,10 @@ describe('simple parallel process', function() {
   });
 });
 
-/**
- *                ---- service task 1 ----
- *               -                        -
- * start - decision                         decision - end
- *               -                        -
- *                ---- service task 2 ----
- */
 describe('simple exclusive gateway process', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('simple exclusive gateway process');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-
-    var decision = processBuilder.decision();
-    processDefinition.addTask(decision);
-
-    var serviceTask1 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task10', variables);
-      complete();
-    });
-    processDefinition.addTask(serviceTask1);
-
-    var serviceTask2 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task20', variables);
-      complete();
-    });
-    processDefinition.addTask(serviceTask2);
-
-    var decisionMerge = processBuilder.decision();
-    processDefinition.addTask(decisionMerge);
-
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-
-    processDefinition.addFlow(startTask, decision);
-    processDefinition.addFlow(decision, serviceTask1, function(variables) {
-      return variables.score < 10;
-    });
-    processDefinition.addFlow(decision, serviceTask2, function(variables) {
-      return variables.score >= 10;
-    });
-    processDefinition.addFlow(serviceTask1, decisionMerge);
-    processDefinition.addFlow(serviceTask2, decisionMerge);
-    processDefinition.addFlow(decisionMerge, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.exclusive));
   });
 
   it('should pass', function(done) {
@@ -188,70 +88,10 @@ describe('simple exclusive gateway process', function() {
   });
 });
 
-
-/**
- *                ---- service task 1 ----
- *               -                        -
- * start - decision                         decision - end
- *               -                        -         -
- *                ---- service task 2 ----  --------
- *                ----- parallel task ----
- */
 describe('exclusive gateway + parrallel gateway process', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('exclusive gateway + parrallel gateway process');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-
-    var parallelTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, Parallel Task is called');
-      complete();
-    });
-    parallelTask.name = 'parallelTask';
-    processDefinition.addTask(parallelTask);
-
-    var decision = processBuilder.decision();
-    processDefinition.addTask(decision);
-
-    var serviceTask1 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task1', variables);
-      complete();
-    });
-    serviceTask1.name = 'serviceTask1';
-    processDefinition.addTask(serviceTask1);
-
-    var serviceTask2 = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task2', variables);
-      complete();
-    });
-    serviceTask2.name = 'serviceTask2';
-    processDefinition.addTask(serviceTask2);
-
-    var decisionMerge = processBuilder.decision();
-    processDefinition.addTask(decisionMerge);
-
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-
-    processDefinition.addFlow(startTask, parallelTask);
-    processDefinition.addFlow(parallelTask, endTask);
-    processDefinition.addFlow(startTask, decision);
-    processDefinition.addFlow(decision, serviceTask1, function(variables) {
-      return variables.score < 10;
-    });
-    processDefinition.addFlow(decision, serviceTask2, function(variables) {
-      return variables.score >= 10;
-    });
-    processDefinition.addFlow(serviceTask1, decisionMerge);
-    processDefinition.addFlow(serviceTask2, decisionMerge);
-    processDefinition.addFlow(decisionMerge, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.parallelExclusive));
   });
 
   it('should pass', function(done) {
@@ -264,8 +104,8 @@ describe('exclusive gateway + parrallel gateway process', function() {
     });
     processInstance.on('end', function () {
       expect(events[0]).to.equal('start-task');
-      expect(events).to.contain('parallelTask');
-      expect(events).to.contain('serviceTask2');
+      expect(events).to.contain('parallel');
+      expect(events).to.contain('service2');
       done();
     });
 
@@ -273,37 +113,10 @@ describe('exclusive gateway + parrallel gateway process', function() {
   });
 });
 
-
-/**
- * start -> service task -> human task -> end
- */
 describe('simple human process', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('simple human process');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-    var humanTask = processBuilder.humanTask();
-    humanTask.name = 'humanTask';
-    humanTask.assignee = 'Oliver Zhou';
-    processDefinition.addTask(humanTask);
-    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task before human task');
-      complete();
-    });
-    processDefinition.addTask(serviceTask);
-
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, serviceTask);
-    processDefinition.addFlow(serviceTask, humanTask);
-    processDefinition.addFlow(humanTask, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.simpleHuman));
   });
 
   it('should pass', function(done) {
@@ -329,37 +142,10 @@ describe('simple human process', function() {
   });
 });
 
-
-/**
- * start -> service task -> human task -> end
- */
 describe('simple human process persistence', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('simple human process persistence');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-    var humanTask = processBuilder.humanTask();
-    humanTask.name = 'humanTask';
-    humanTask.assignee = 'Oliver Zhou';
-    processDefinition.addTask(humanTask);
-    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task');
-      complete();
-    });
-    processDefinition.addTask(serviceTask);
-
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, serviceTask);
-    processDefinition.addFlow(serviceTask, humanTask);
-    processDefinition.addFlow(humanTask, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.simpleHuman));
   });
 
   it('should pass', function(done) {
@@ -392,53 +178,10 @@ describe('simple human process persistence', function() {
   });
 });
 
-
-/**
- * start -> service task -> decision-repeat -> human task -> decision -> end
- *                                    |                        |
- *                                    |________________________|                                            
- */
 describe('human process with cycle', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('human process with cycle');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task before human task');
-      complete();
-    });
-    processDefinition.addTask(serviceTask);
-    var humanTask = processBuilder.humanTask();
-    humanTask.name = 'humanTask';
-    humanTask.assignee = 'Oliver Zhou';
-    processDefinition.addTask(humanTask);
-
-    var decisionRepeat = processBuilder.decision();
-    processDefinition.addTask(decisionRepeat);
-
-    var decision = processBuilder.decision();
-    processDefinition.addTask(decision);
-
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, serviceTask);
-    processDefinition.addFlow(serviceTask, decisionRepeat);
-    processDefinition.addFlow(decisionRepeat, humanTask);
-    processDefinition.addFlow(humanTask, decision);
-
-    processDefinition.addFlow(decision, endTask, function(variables) {
-      return variables.score < 10;
-    });
-    processDefinition.addFlow(decision, decisionRepeat, function(variables) {
-      return variables.score >= 10;
-    });
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.cycle));
   });
 
   it('should pass', function(done) {
@@ -468,26 +211,9 @@ describe('human process with cycle', function() {
 });
 
 describe('simple process with error', function() {
-  function createProcessDefinition() {
-    var processDefinition = processEngine.createProcessDefinition('simple process');
-    var startTask = processBuilder.startTask();
-    processDefinition.addTask(startTask);
-    var serviceTask = processBuilder.serviceTask(function (variables, complete) {
-      console.log('Oh, service task with error');
-      complete({error: 'this is an error message'});
-    });
-    processDefinition.addTask(serviceTask);
-    var endTask = processBuilder.endTask();
-    processDefinition.addTask(endTask);
-    processDefinition.addFlow(startTask, serviceTask);
-    processDefinition.addFlow(serviceTask, endTask);
-
-    return processDefinition;
-  }
-
   var processInstance;
   beforeEach(function() {
-    processInstance = processEngine.createProcessInstance(createProcessDefinition());
+    processInstance = processEngine.createProcessInstance(processEngine.importProcessDefinition(samples.error));
   });
 
   it('should pass', function(done) {
