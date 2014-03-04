@@ -74,6 +74,7 @@ exports.config = {
     }
   },
   server: {
-    path: 'nodemon-wrapper.js'
+    path: 'nodemon-wrapper.js',
+    port: 3000
   }
 };

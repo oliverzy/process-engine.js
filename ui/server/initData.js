@@ -1,5 +1,3 @@
-var ProcessEngine = require('process-engine');
-var ProcessDefinition = ProcessEngine.ProcessDefinition;
 var _ = require('lodash');
 var samples = require('process-engine/examples/basic-processes');
 var insuranceSamples = require('process-engine/examples/insurance-processes');
@@ -9,12 +7,9 @@ function init(app) {
   var humanTaskService = processEngine.humanTaskService;
   var processBuilder = processEngine.processBuilder;
 
-  _.each(samples, function (definition) {
-    var processDefinition = processEngine.importProcessDefinition(definition);
-    processDefinition.save().done();
-  });
-
-  _.each(insuranceSamples, function (definition) {
+  var allSamples = {};
+  _.extend(allSamples, samples, insuranceSamples);
+  _.each(allSamples, function (definition) {
     var processDefinition = processEngine.importProcessDefinition(definition);
     processDefinition.save().done();
   });

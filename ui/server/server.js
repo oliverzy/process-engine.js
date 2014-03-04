@@ -1,6 +1,6 @@
 var Promise = require("bluebird");
 Promise.longStackTraces();
-var ProcessEngine = require('process-engine');
+var ProcessEngine = require('../..');
 var processEngine = ProcessEngine.create();
 var express = require('express'),
   namespace = require('express-namespace'),

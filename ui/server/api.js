@@ -1,6 +1,5 @@
 var _ = require('lodash');
-var ProcessEngine = require('process-engine');
-var ProcessDefinition = ProcessEngine.ProcessDefinition;
+var ProcessEngine = require('../..');
 
 exports.addRoutes = function (app) {
   var processEngine = app.get('processEngine');
