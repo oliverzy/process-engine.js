@@ -32,6 +32,7 @@ module.controller('ProcessDefinitionCtrl', function ($scope, $http, ngTableParam
   });
 
   $scope.view = function (def) {
+    def.variables = def.variables || {};
     $scope.currentDef = def;
   };
 
