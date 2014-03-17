@@ -95,12 +95,15 @@ function doLayout(diagramModel) {
   });
 }
 
-
-module.exports = {
+var engineAPI = {
   getDiagramModel: function (processDefinition) {
     var diagramModel = createDiagramModel(processDefinition);
     doLayout(diagramModel);
     return diagramModel;
   }
+};
+
+module.exports = {
+  API: engineAPI
 };
 

@@ -57,7 +57,7 @@ exports.addRoutes = function (app) {
     app.get('/:id/diagram', function (req, res) {
       if (req.params.id)
         processEngine.loadProcessDefinition(req.params.id).done(function (def) {
-          var diagram_model = ProcessEngine.Diagram.getDiagramModel(def);
+          var diagram_model = processEngine.getDiagramModel(def);
           return res.json(diagram_model);
         });
       else

@@ -92,6 +92,7 @@ process-engine.js contains a Node.js web application to manage the process insta
   * User Management Service
   * Performance Benchmark
 * Future
+  * Message/Timer Event Support
   * Separate Running and Histronic Process Instances into different collections
   * Sub Process
   * BPMN 2.0 XML Import/Export

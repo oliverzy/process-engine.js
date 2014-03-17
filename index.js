@@ -7,10 +7,10 @@ var HumanTask = require('./src/human-task.js');
 var ProcessInstance = require('./src/process-instance.js');
 
 _.extend(ProcessEngine.prototype, ProcessInstance.API);
-ProcessEngine.Diagram = Diagram;
 ProcessEngine.InstanceStatus = ProcessInstance.Instance.STATUS;
 ProcessEngine.HumanTaskServiceStatus = HumanTask.Service.STATUS;
 _.extend(ProcessEngine.prototype, ProcessDefinition.API);
+_.extend(ProcessEngine.prototype, Diagram.API);
 
 
 ProcessEngine.create = function (options_) {
