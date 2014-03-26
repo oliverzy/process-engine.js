@@ -76,6 +76,7 @@ process-engine.js contains a Node.js web application to manage the process insta
 * Go to `ui` folder
 * Run `npm install`
 * Run `bower install` 
+* Run `npm install -g nodemon`
 * Run `brunch watch --server` to launch the server
 * Open `http://localhost:3000/#/definitions` in your browser
 
@@ -84,7 +85,6 @@ process-engine.js contains a Node.js web application to manage the process insta
 * Front End Package Manager: `npm install -g bower`
 * Front End Build: `npm install -g brunch`
 * Code Coverage: `npm install -g istanbul`
-* nodemon: `npm install -g nodemon`
 
 ###Roadmap
 * Planned
