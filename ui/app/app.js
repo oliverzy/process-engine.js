@@ -6,8 +6,8 @@ var app = angular.module("myApp", ['Common', 'Security', 'Test', 'HumanTask', 'P
 
 app.config(function($routeProvider) {
   $routeProvider.when('/', {
-    templateUrl: "modules/human-task/work-list.html",
-    controller: 'WorkListCtrl'
+    templateUrl: "modules/process-definition/process-definition.html",
+    controller: 'ProcessDefinitionCtrl'
   })
   .otherwise({
     redirectTo: '/'

@@ -1,6 +1,6 @@
 var _ = require('lodash');
-var samples = require('process-engine/examples/basic-processes');
-var insuranceSamples = require('process-engine/examples/insurance-processes');
+var samples = require('../../examples/basic-processes');
+var insuranceSamples = require('../../examples/insurance-processes');
 
 function init(app) {
   var processEngine = app.get('processEngine');
