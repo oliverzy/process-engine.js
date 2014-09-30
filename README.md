@@ -44,6 +44,20 @@ var processInstance = processEngine.createProcessInstance(processDefinition);
 processInstance.start();
 ```
 
+###Guide
+`Process definition` describes the workflow using tasks and flows. 
+The built-in task types:
+
+* `start`: mark the start of process, must be the first task
+*  `end`: mark the end of process.
+*  `service`: automatic task type that execute any code in it
+*  `decision`: Certain things can only be done under certain circumstances. The decision task is used to mark the fork and join of execution path
+*  `human`: manual task type, they are assigned by engine, e.g. place it in the task list, the engine expect confirmation to continue the execution
+
+The flow is something to connect the tasks and can take a condition function if the `from` task is decision task.
+
+human task service is used to manipulate the task list.
+
 __See examples/tests for all usage that process engine supports__
 
 ###API
@@ -88,6 +102,7 @@ process-engine.js contains a Node.js web application to manage the process insta
 
 ###Roadmap
 * Planned
+  * Process Diagram Designer via D3(SVG)
   * Human Task Form Builder
   * User Management Service
   * Performance Benchmark
