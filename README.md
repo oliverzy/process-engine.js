@@ -1,18 +1,18 @@
 __Process automation for Node.js__
 
 
-###Best For
+### Best For
 * Task Orchestration
 * Human Task Management
 * Process Management and Monitoring via a Node.js web application
 
-###Features
+### Features
 * Start/End/Decision/Parallel/Service/Human Task
 * Human Task Management
 * Process Definition Management and Visualization
 * Process Instance Management and Visualization
 
-###Get Started
+### Get Started
 `npm install process-engine`
 
 ```js
@@ -44,7 +44,7 @@ var processInstance = processEngine.createProcessInstance(processDefinition);
 processInstance.start();
 ```
 
-###Guide
+### Guide
 `Process definition` describes the workflow using tasks and flows. 
 The built-in task types:
 
@@ -60,7 +60,7 @@ human task service is used to manipulate the task list.
 
 __See examples/tests for all usage that process engine supports__
 
-###API
+### API
 * `ProcessEngine`
   * `importProcessDefinition(definition)`: Create a new process definition based on `definition` object
   * `createProcessDefinition(name)`: Create an empty process definition with `name`
@@ -83,7 +83,7 @@ __See examples/tests for all usage that process engine supports__
   * `startWorking(taskId)`: Start to work on the human task `taskId`
   * `query(conditions)`: Query the human tasks by `conditions`
 
-###UI
+### UI
 ![image](https://dl.dropboxusercontent.com/u/54970183/Snip20140301_2.png)
 
 process-engine.js contains a Node.js web application to manage the process instances and human task list.
@@ -94,13 +94,13 @@ process-engine.js contains a Node.js web application to manage the process insta
 * Run `brunch watch --server` to launch the server
 * Open `http://localhost:3000/#/definitions` in your browser
 
-###Development
+### Development
 * Test Runner: `npm install -g mocha`
 * Front End Package Manager: `npm install -g bower`
 * Front End Build: `npm install -g brunch`
 * Code Coverage: `npm install -g istanbul`
 
-###Roadmap
+### Roadmap
 * Planned
   * Process Diagram Designer via D3(SVG)
   * Human Task Form Builder
